@@ -1,0 +1,89 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f9f9f9;
+  color: #333;
+}
+
+.App {
+  padding: 20px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.deck {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  position: relative;
+}
+
+.card {
+  width: 300px;
+  height: 400px;
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  text-align: left;
+  position: absolute;
+  will-change: transform;
+  background-color: white;
+  border: 4px solid #ccc;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+/* ✅ Keeps your card colors */
+.card.orange {
+  background-color: #ffa500;
+  border-color: #e69500;
+}
+
+.card.green {
+  background-color: #32cd32;
+  border-color: #228b22;
+}
+
+.card.red {
+  background-color: #ff6347;
+  border-color: #e55347;
+}
+
+.card.brown {
+  background-color: #a0522d;
+  border-color: #8b4513;
+}
+
+.card.cheese-orange {
+  background-color: #ffd700;
+  border-color: #ffc700;
+}
+
+/* ✅ Like/Dislike Indicator Styling */
+.action {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 30px;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease-in-out;
+}
+
+.action.right {
+  background-color: #32cd32; /* ✅ GREEN for Liked */
+  color: white;
+}
+
+.action.left {
+  background-color: #ff6347; /* ✅ RED for Disliked */
+  color: white;
+}

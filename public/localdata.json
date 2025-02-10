@@ -1,0 +1,31 @@
+[
+    {
+      "name": "Bloom Brasserie",
+      "city": "Dublin",
+      "cuisine style": ["Irish", "European"],
+      "rating": "4.5",
+      "price range": "$$-$$$"
+    },
+    {
+      "name": "The Vintage Kitchen",
+      "city": "Dublin",
+      "cuisine style": ["Irish", "European"],
+      "rating": "4.5",
+      "price range": "$$-$$$"
+    },
+    {
+      "name": "Chapter One",
+      "city": "Dublin",
+      "cuisine style": ["Irish", "European"],
+      "rating": "4.5",
+      "price range": "$$$$"
+    },
+    {
+      "name": "Dax Restaurant",
+      "city": "Dublin",
+      "cuisine style": ["French"],
+      "rating": "4.5",
+      "price range": "$$$$"
+    }
+  ]
+  
