@@ -2,7 +2,10 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import MapPage from "./mappage.jsx"; // Import the Map Page
+import Login from './login.jsx'; 
 import "./styles.css";
+
+// import "./login.jsx";
 
 export default function App() {
   const [cards, setCards] = useState([]);
@@ -42,12 +45,13 @@ export default function App() {
         <nav className="navbar">
           <Link to="/">Swipe Deck</Link>
           <Link to="/map">Location Map</Link>
+          <Link to='/login'>Login page</Link>
         </nav>
 
         {/* ✅ Routes: Home (Swipe Deck) & Map Page */}
         <Routes>
           <Route
-            path="/"
+           path="/"
             element={
               <>
                 <h1>Swipe Deck</h1>
@@ -100,6 +104,7 @@ export default function App() {
             }
           />
           <Route path="/map" element={<MapPage />} />
+          <Route path='/login' element={<Login />} />
         </Routes>
       </div>
     </Router>
