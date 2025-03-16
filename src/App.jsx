@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import MapPage from "./mappage.jsx"; // Import the Map Page
+import Login from './login.jsx'; 
+import Register from './register.jsx';
+import RegistrationForm from "./loadPage.jsx";
 import "./styles.css";
+
+// import "./login.jsx";
 
 export default function App() {
   const [cards, setCards] = useState([]);
@@ -40,14 +45,18 @@ export default function App() {
       <div className="App">
         {/* ✅ Navigation Bar */}
         <nav className="navbar">
-          <Link to="/">Swipe Deck</Link>
+          <Link to="/home">Swipe Deck</Link>
           <Link to="/map">Location Map</Link>
+          {/* registration, guest and log in taken out from the nav */}
+          {/* <Link to='/login'>Login page</Link>
+          <Link to='/register'>Register page</Link>
+          <Link to='/'>Load Page</Link> */} 
         </nav>
 
         {/* ✅ Routes: Home (Swipe Deck) & Map Page */}
         <Routes>
           <Route
-            path="/"
+           path="/home" //changed the paths for log in to be the first screen
             element={
               <>
                 <h1>Swipe Deck</h1>
@@ -100,6 +109,10 @@ export default function App() {
             }
           />
           <Route path="/map" element={<MapPage />} />
+             {/* changed the paths for log in to be the first screen */}
+          <Route path='/login' element={<Login />} />     
+          <Route path='/register' element={<Register />} />
+          <Route path='/' element={<RegistrationForm />} />
         </Routes>
       </div>
     </Router>
