@@ -6,12 +6,14 @@ import Login from './login.jsx';
 import Register from './register.jsx';
 import RegistrationForm from "./loadPage.jsx";
 import "./styles.css";
+import StartScreen from './startscreen.jsx';
+import SessionGate from './sessiongate';
 
 // import "./login.jsx";
-
 export default function App() {
   const [cards, setCards] = useState([]);
   const [swipeDirection, setSwipeDirection] = useState(null);
+  const [sessionCode, setSessionCode] = useState(null); 
 
   useEffect(() => {
     fetch("/localdata.json")
@@ -27,7 +29,7 @@ export default function App() {
 
   const handleSwipe = (direction, index) => {
     setSwipeDirection(direction);
-    
+
     setTimeout(() => {
       setCards((prevCards) => prevCards.filter((_, i) => i !== index));
       setSwipeDirection(null);
@@ -43,21 +45,20 @@ export default function App() {
   return (
     <Router>
       <div className="App">
-        {/* ✅ Navigation Bar */}
+        {/* Nav Bar */}
         <nav className="navbar">
           <Link to="/home">Swipe Deck</Link>
           <Link to="/map">Location Map</Link>
-          {/* registration, guest and log in taken out from the nav */}
-          {/* <Link to='/login'>Login page</Link>
-          <Link to='/register'>Register page</Link>
-          <Link to='/'>Load Page</Link> */} 
         </nav>
 
-        {/* ✅ Routes: Home (Swipe Deck) & Map Page */}
+        {/* Routes */}
         <Routes>
-          <Route
-           path="/home" //changed the paths for log in to be the first screen
-            element={
+          {/* Start screen is now the first thing users see */}
+          <Route path="/" element={<StartScreen />} />
+
+          {/* Gatekeeping session screen before swipe access */}
+          <Route path="/home" element={
+            sessionCode ? (
               <>
                 <h1>Swipe Deck</h1>
                 {swipeDirection && (
@@ -106,16 +107,19 @@ export default function App() {
                   </AnimatePresence>
                 </div>
               </>
-            }
-          />
+            ) : (
+              <SessionGate onSessionReady={(code) => setSessionCode(code)} />
+            )
+          } />
+
+          {/* Other pages */}
           <Route path="/map" element={<MapPage />} />
-             {/* changed the paths for log in to be the first screen */}
-          <Route path='/login' element={<Login />} />     
-          <Route path='/register' element={<Register />} />
-          <Route path='/' element={<RegistrationForm />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </div>
     </Router>
   );
 }
+
 

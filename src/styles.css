@@ -38,7 +38,7 @@ h1 {
   line-height: 1.5;
 }
 
-/* ✅ Keeps your card colors */
+/* Card Colors */
 .card.orange {
   background-color: #ffa500;
   border-color: #e69500;
@@ -64,7 +64,7 @@ h1 {
   border-color: #ffc700;
 }
 
-/* ✅ Like/Dislike Indicator Styling */
+/* Like Dislike Styling */
 .action {
   position: fixed;
   top: 10%;
@@ -79,12 +79,12 @@ h1 {
 }
 
 .action.right {
-  background-color: #32cd32; /* ✅ GREEN for Liked */
+  background-color: #32cd32; /* Liked Green */
   color: white;
 }
 
 .action.left {
-  background-color: #ff6347; /* ✅ RED for Disliked */
+  background-color: #ff6347; /* Dislike Red */
   color: white;
 }
 
@@ -207,4 +207,115 @@ h1 {
   font-size: 19px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.start-screen-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 20px;
+}
+
+/* This is your mobile phone look */
+.phone-frame {
+  width: 375px;
+  height: 750px;
+  background-color: #ffffff;
+  border-radius: 40px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.start-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding-top: 80px;
+  text-align: center;
+}
+
+.logo-placeholder {
+  margin-bottom: 40px;
+}
+
+.logo-placeholder img {
+  width: 120px;
+  height: 120px;
+  border-radius: 20px;
+  object-fit: contain;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.button-group button {
+  width: 250px;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  background-color: #ff6b6b;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.button-group button:hover {
+  background-color: #e65a5a;
+}
+
+/* Session Gate */ 
+
+.session-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 60px 20px;
+  max-width: 375px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: #fff;
+  border-radius: 30px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  min-height: 600px;
+}
+
+.session-gate h1 {
+  margin-bottom: 20px;
+  color: #ff6b6b;
+}
+
+.session-gate input {
+  padding: 10px 15px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  width: 200px;
+  margin-top: 10px;
+}
+
+.session-gate button {
+  padding: 10px 20px;
+  border-radius: 25px;
+  border: none;
+  background-color: #ff6b6b;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.session-gate button:hover {
+  background-color: #e65a5a;
 }
