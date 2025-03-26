@@ -208,3 +208,27 @@ h1 {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* login/register buttons */
+.button-wrapper{
+  display: flex;
+  justify-content: center;  /* Horizontally centered */
+  align-items: center;      /* Vertically centered */
+  height: 100vh;            /* Full viewport height */
+  flex-direction: column; 
+}
+
+button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 220px;
+  height: 59px;
+  margin: 20px;
+  color: #fff;
+  background: #F37474;
+  border-radius: 50px;
+  font-size: 19px;
+  font-weight: 700;
+  cursor: pointer;
+}

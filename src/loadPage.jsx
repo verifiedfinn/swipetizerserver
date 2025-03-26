@@ -5,7 +5,7 @@ const RegistrationForm = () => {
     const navigate = useNavigate();
 
     return (
-        <div>
+        <div className="button-wrapper">  
             <div className="register">
                 <button onClick={() => navigate('/register')}>Register</button>
             </div>

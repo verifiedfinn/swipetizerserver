@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import './styles.css';
 import Axios from 'axios';
 
@@ -8,6 +8,7 @@ function Register () {
   const [usernameReg, setUsernameReg] = useState('')
   const [passwordReg, setPasswordReg] = useState('')
 
+  const navigate = useNavigate(); 
 
   const register = () => {
     Axios.post('http://localhost:3001/register', {
@@ -15,6 +16,9 @@ function Register () {
       password: passwordReg
     }).then((response) => {
       console.log(response);
+      navigate('/login'); 
+    }).catch((err) => {
+      console.error(err);
     });
   };
 
@@ -41,7 +45,10 @@ function Register () {
                     setPasswordReg(e.target.value);
                  }}/>
               </div>
-            <button type="submit" onClick={register}>register</button>
+
+           <div className="submit-container">
+           <button type="submit" onClick={register}>Register</button>
+           </div>
           </div>
 
     </div>

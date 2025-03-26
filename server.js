@@ -35,8 +35,14 @@ app.post('/register', (req, res) => {
         [username, password], 
         (err, result) => {
             console.log(err);
-        }
-    );
+            if (err) {
+                console.log(err);
+                res.status(500).send({ message: "Registration failed", error: err });
+              } else {
+                res.status(200).send({ message: "User registered successfully!" });
+              }
+            }
+        );
 });
 
 app.post('/login', (req, res) => {
