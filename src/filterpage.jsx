@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Nouislider from 'nouislider-react';
-import 'nouislider/distribute/nouislider.css';
+import 'nouislider/dist/nouislider.css';
+import Axios from 'axios';
 
 const FilterPage = () => {
   const [distance, setDistance] = useState(5);
@@ -8,6 +10,8 @@ const FilterPage = () => {
   const [ratingRange, setRatingRange] = useState([3, 5]);
   const [dietaryRestrictions, setDietaryRestrictions] = useState([]);
   const [cuisinePreferences, setCuisinePreferences] = useState([]);
+  const [sessionCode, setSessionCode] = useState('');
+  const navigate = useNavigate();
 
   const handleCheckboxChange = (setter, value) => {
     setter((prev) =>
@@ -18,7 +22,7 @@ const FilterPage = () => {
   };
 
   const handleCreateSession = () => {
-    const sessionData = {
+    const preferences = {
       distance,
       priceRange,
       ratingRange,
@@ -26,26 +30,38 @@ const FilterPage = () => {
       cuisinePreferences,
     };
 
-    // Send sessionData to your backend to store in MySQL
-    fetch('/api/create-session', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(sessionData),
+    Axios.post('http://localhost:3001/create-session', {
+      user_id: 1, // Replace with actual user ID if logged in
+      preferences,
     })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log('Session created:', data);
-        // Handle post-creation logic here
+      .then((response) => {
+        const { session_token } = response.data;
+        setSessionCode(session_token);
+        navigate('/slide-deck', { state: { sessionCode: session_token } });
       })
       .catch((error) => {
-        console.error('Error creating session:', error);
+        console.error('❌ Error creating session:', error);
       });
   };
 
   return (
     <div className="filter-page">
+      {/* === SESSION CODE UI === */}
+      {sessionCode && (
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <h3>Session Code</h3>
+          <div
+            style={{
+              fontSize: '24px',
+              fontWeight: 'bold',
+              letterSpacing: '2px',
+            }}
+          >
+            {sessionCode}
+          </div>
+        </div>
+      )}
+
       <h1>SESSION PREFERENCES</h1>
 
       <div className="section">

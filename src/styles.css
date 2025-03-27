@@ -319,3 +319,223 @@ h1 {
 .session-gate button:hover {
   background-color: #e65a5a;
 }
+
+/* session styles */
+
+/* SESSION CHOICE CUSTOM STYLES */
+/* Full screen center wrapper */
+.session-choice-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #fff;
+}
+
+/* Card layout for buttons + dropdown */
+.session-choice-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  width: 300px;
+}
+
+.session-choice-card h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Reused from existing buttons */
+.session-button {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 30px;
+  font-weight: 600;
+  background-color: #ff6b6b;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  margin-bottom: 15px;
+}
+
+.session-button:hover {
+  background-color: #e65a5a;
+}
+
+/* Dropdown */
+.pin-dropdown {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.pin-dropdown.open {
+  max-height: 100px;
+  opacity: 1;
+}
+
+.pin-input {
+  height: 42px;
+  width: 160px;
+  border: 1px solid #333;
+  border-top-left-radius: 30px;
+  border-bottom-left-radius: 30px;
+  padding: 0 15px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #888;
+  outline: none;
+}
+
+.pin-join-btn {
+  height: 42px;
+  border: none;
+  border-top-right-radius: 20px;
+  border-bottom-right-radius: 20px;
+  background-color: #ff8a8a;
+  padding: 0 18px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  color: black;
+  transition: background-color 0.3s ease;
+}
+
+.pin-join-btn:hover {
+  background-color: #e66a6a;
+}
+
+
+/* Filter Page*/
+.filter-page {
+  max-width: 420px;
+  margin: 40px auto;
+  background-color: #fff;
+  padding: 30px 20px;
+  border-radius: 25px;
+  box-shadow: 0 0 15px rgba(255, 105, 105, 0.2);
+  font-family: 'Arial', sans-serif;
+}
+
+.filter-page h1 {
+  text-align: center;
+  font-size: 24px;
+  color: #f37474;
+  margin-bottom: 25px;
+  font-weight: bold;
+}
+
+.filter-page .section {
+  margin-bottom: 25px;
+}
+
+.filter-page .label,
+.filter-page .value {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 8px;
+  color: #333;
+  font-weight: 500;
+}
+
+.filter-page hr {
+  border: none;
+  height: 1px;
+  background-color: #f4c5c5;
+  margin: 20px 0;
+}
+
+.filter-page h3 {
+  font-size: 18px;
+  color: #f37474;
+  margin-bottom: 10px;
+}
+
+.filter-page label {
+  display: block;
+  font-size: 15px;
+  margin: 6px 0;
+  color: #222;
+}
+
+.filter-page input[type="checkbox"] {
+  accent-color: #f37474;
+  margin-right: 8px;
+  transform: scale(1.1);
+}
+
+.create-session-btn {
+  display: block;
+  width: 100%;
+  padding: 14px 0;
+  border-radius: 30px;
+  background-color: #f37474;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 30px;
+}
+
+.create-session-btn:hover {
+  background-color: #e25d5d;
+}
+
+/* Session Code Display */
+.filter-page .session-code {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.session-code h3 {
+  font-size: 18px;
+  color: #f37474;
+}
+
+.session-code .code-box {
+  font-size: 24px;
+  font-weight: bold;
+  letter-spacing: 2px;
+  color: #222;
+  margin-top: 8px;
+}
+
+.session-code button {
+  margin-top: 10px;
+  background: #ffd3d3;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.session-code button:hover {
+  background-color: #fbbbbb;
+}
+
+/* Checkbox layout */
+.preference-grid {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.preference-grid > div {
+  width: 48%;
+}

@@ -107,8 +107,11 @@ app.post("/login", (req, res) => {
 
 // ---------------------- CREATE SESSION ----------------------
 app.post("/create-session", (req, res) => {
-  const { user_id, preferences } = req.body;
-  const session_token = Math.random().toString(36).substr(2, 6).toUpperCase();
+  const { user_id, session_token, preferences } = req.body;
+
+  if (!session_token) {
+    return res.status(400).send({ message: "Missing session_token" });
+  }
 
   db.query(
     "INSERT INTO sessions (user_id, session_token, device_info, created_at) VALUES (?, ?, ?, NOW())",

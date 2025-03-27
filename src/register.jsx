@@ -1,25 +1,28 @@
 import React, { useState } from 'react';
 import './styles.css';
 import Axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // routerchanger
 
 function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
+  const navigate = useNavigate(); // Hook into navigation
 
   const register = () => {
     if (!email || !password) {
       setStatus("Please fill out both fields.");
       return;
     }
-
+  
     Axios.post('http://localhost:3001/register', {
-      username: email, // maps to MySQL `name`
+      username: email,
       password: password
     })
       .then((response) => {
         console.log(response.data);
         setStatus("✅ Registered successfully!");
+        navigate('/session-choice');
       })
       .catch((error) => {
         console.error(error);
@@ -61,5 +64,6 @@ function Register() {
 }
 
 export default Register;
+
 
 

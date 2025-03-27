@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import Axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const SessionGate = ({ onSessionReady }) => {
   const [sessionCode, setSessionCode] = useState('');
   const [createdCode, setCreatedCode] = useState('');
   const [hasJoined, setHasJoined] = useState(false);
+  const navigate = useNavigate();
 
   const handlePasteCode = async () => {
     try {
@@ -15,23 +18,40 @@ const SessionGate = ({ onSessionReady }) => {
   };
 
   const handleCreateSession = () => {
-    const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
-    setCreatedCode(randomCode);
+    Axios.post('http://localhost:3001/create-session', {
+      user_id: 1, // Replace with actual user_id from login
+      preferences: {}
+    })
+    .then((res) => {
+      const code = res.data.session_code;
+      setCreatedCode(code);
+      setSessionCode(code); // Automatically fill join input
+    })
+    .catch((err) => {
+      console.error("Failed to create session:", err);
+      alert("Could not create session.");
+    });
   };
 
   const handleStartSwipetizing = () => {
-    if (createdCode || sessionCode) {
-      const code = createdCode || sessionCode;
-      onSessionReady(code); // Code pass
-      setHasJoined(true);
-    } else {
-      alert("Please create or join a session first.");
-    }
+    const code = createdCode || sessionCode;
+
+    if (!code) return alert("Please create or join a session first.");
+
+    Axios.post('http://localhost:3001/join-session', { session_token: code })
+      .then((res) => {
+        onSessionReady(code);
+        setHasJoined(true);
+        navigate('/filters'); // Redirect to filter page
+      })
+      .catch(() => {
+        alert("Invalid session code.");
+      });
   };
 
   return (
     <div className="session-gate">
-      {!hasJoined && (
+      {!hasJoined ? (
         <>
           <h1>Welcome to Swipetizer</h1>
           
@@ -68,9 +88,7 @@ const SessionGate = ({ onSessionReady }) => {
             <button onClick={handleStartSwipetizing}>Start Swipetizing</button>
           </div>
         </>
-      )}
-
-      {hasJoined && (
+      ) : (
         <h2>Loading your session... 🍔</h2>
       )}
     </div>
