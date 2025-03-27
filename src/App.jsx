@@ -16,8 +16,13 @@ export default function App() {
   const [cards, setCards] = useState([]);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [sessionCode, setSessionCode] = useState(null); 
+  const [loading, setLoading] = useState(true);
+
 
   useEffect(() => {
+    // simulate 1s of loading
+    const timer = setTimeout(() => setLoading(false), 1000);
+
     fetch("/localdata.json")
       .then((response) => {
         if (!response.ok) {
@@ -27,6 +32,7 @@ export default function App() {
       })
       .then((data) => setCards(data.reverse()))
       .catch((error) => console.error("Error loading data:", error));
+      return () => clearTimeout(timer); // prevent accidents
   }, []);
 
   const handleSwipe = (direction, index) => {
@@ -44,7 +50,16 @@ export default function App() {
     return colorClasses[index % colorClasses.length];
   };
 
-  return (
+  if (loading) {
+    return (
+      <div className="loading-page">
+        <div className="loader"></div>
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+return (
 <Router>
   <div className="App">
     {/* Nav Bar */}

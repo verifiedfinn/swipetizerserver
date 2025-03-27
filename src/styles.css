@@ -539,3 +539,46 @@ h1 {
 .preference-grid > div {
   width: 48%;
 }
+
+/* loading style in general */
+.loading-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+  z-index: 9999;
+}
+
+/* rotation */
+.loader {
+  border: 6px solid #ddd;
+  border-top: 6px solid #f37474;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+/* key frames of rotation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* page fading in */
+.filter-page {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
