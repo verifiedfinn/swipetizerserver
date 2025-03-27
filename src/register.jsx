@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import './styles.css';
 import Axios from 'axios';
 import { useNavigate } from 'react-router-dom'; // routerchanger
@@ -31,10 +32,32 @@ function Register() {
   };
 
   return (
-    <div className="container">
-      <div className="header">
-        <div className="text">Registration</div>
-      </div>
+    <div className='container'>
+      
+      
+      {/* registration */}
+         <div className="header">
+            <div className="text">Registration</div> 
+         </div>
+    
+          <div className="inputs">
+               <div className="input">
+                 <input type="email" placeholder='Email'
+                 onChange={(e) =>{
+                    setUsernameReg(e.target.value);
+                 }}/>
+               </div>
+              <div className="input">
+                  <input type="password" placeholder='Password'
+                  onChange={(e) =>{
+                    setPasswordReg(e.target.value);
+                 }}/>
+              </div>
+
+           <div className="submit-container">
+           <button type="submit" onClick={register}>Register</button>
+           </div>
+          </div>
 
       <div className="inputs">
         <div className="input">

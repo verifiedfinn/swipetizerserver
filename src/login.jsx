@@ -23,7 +23,7 @@ function Login() {
       }
     }).catch(error => {
       console.error("Login error:", error);
-      setLoginStatus("Error logging in.");
+      setLoginStatus("Error logging in");
     });
   };
 
