@@ -1,21 +1,20 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './styles.css';
 import Axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // routerchanger
 
 function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [status, setStatus] = useState('');
-  const navigate = useNavigate(); // Hook into navigation
+  const navigate = useNavigate();
 
   const register = () => {
     if (!email || !password) {
       setStatus("Please fill out both fields.");
       return;
     }
-  
+
     Axios.post('http://localhost:3001/register', {
       username: email,
       password: password
@@ -23,7 +22,7 @@ function Register() {
       .then((response) => {
         console.log(response.data);
         setStatus("✅ Registered successfully!");
-        navigate('/session-choice');
+        setTimeout(() => navigate('/session-choice'), 1000); // Small delay for UX
       })
       .catch((error) => {
         console.error(error);
@@ -33,37 +32,16 @@ function Register() {
 
   return (
     <div className='container'>
-      
-      
-      {/* registration */}
-         <div className="header">
-            <div className="text">Registration</div> 
-         </div>
-    
-          <div className="inputs">
-               <div className="input">
-                 <input type="email" placeholder='Email'
-                 onChange={(e) =>{
-                    setUsernameReg(e.target.value);
-                 }}/>
-               </div>
-              <div className="input">
-                  <input type="password" placeholder='Password'
-                  onChange={(e) =>{
-                    setPasswordReg(e.target.value);
-                 }}/>
-              </div>
-
-           <div className="submit-container">
-           <button type="submit" onClick={register}>Register</button>
-           </div>
-          </div>
+      <div className="header">
+        <div className="text">Registration</div>
+      </div>
 
       <div className="inputs">
         <div className="input">
           <input
             type="email"
             placeholder="Email"
+            value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
@@ -72,6 +50,7 @@ function Register() {
           <input
             type="password"
             placeholder="Password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
@@ -87,6 +66,7 @@ function Register() {
 }
 
 export default Register;
+
 
 
 

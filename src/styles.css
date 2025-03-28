@@ -369,15 +369,16 @@ h1 {
 }
 
 /* Dropdown */
+
 .pin-dropdown {
-  display: flex;
   justify-content: center;
   align-items: center;
   overflow: hidden;
   max-height: 0;
   opacity: 0;
   transition: max-height 0.4s ease, opacity 0.3s ease;
-  margin-bottom: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
 }
 
 .pin-dropdown.open {
@@ -401,8 +402,6 @@ h1 {
 .pin-join-btn {
   height: 42px;
   border: none;
-  border-top-right-radius: 20px;
-  border-bottom-right-radius: 20px;
   background-color: #ff8a8a;
   padding: 0 18px;
   font-size: 16px;
@@ -594,7 +593,23 @@ h1 {
 }
 
 button {
-  display: flex;
+  display: flex;/* styles.css */
+
+  .pin-dropdown {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+    margin-bottom: 10px;
+  }
+  
+  .pin-dropdown.open {
+    max-height: 100px; /* Adjust based on content */
+    opacity: 1;
+  }
   justify-content: center;
   align-items: center;
   width: 220px;

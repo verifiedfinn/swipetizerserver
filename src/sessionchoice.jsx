@@ -18,7 +18,10 @@ const SessionChoice = () => {
       <div className="session-choice-card">
         <h2>How do you want to start?</h2>
 
-        <button className="session-button" onClick={() => setShowJoinInput(!showJoinInput)}>
+        <button
+          className="session-button"
+          onClick={() => setShowJoinInput((prev) => !prev)}
+        >
           Join Session
         </button>
 
@@ -30,10 +33,15 @@ const SessionChoice = () => {
             value={pin}
             onChange={(e) => setPin(e.target.value)}
           />
-          <button className="pin-join-btn" onClick={handleJoin}>Join</button>
+          <button className="pin-join-btn" onClick={handleJoin}>
+            Join
+          </button>
         </div>
 
-        <button className="session-button" onClick={() => navigate('/filter-page')}>
+        <button
+          className="session-button"
+          onClick={() => navigate('/filter-page')}
+        >
           Create Session
         </button>
       </div>
@@ -42,4 +50,3 @@ const SessionChoice = () => {
 };
 
 export default SessionChoice;
-
