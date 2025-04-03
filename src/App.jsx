@@ -66,6 +66,7 @@ return (
     <nav className="navbar">
       <Link to="/home">Swipe Deck</Link>
       <Link to="/map">Location Map</Link>
+      {/* <Link to="/filterpage">filter</Link> */}
     </nav>
 
     {/* Routes */}
