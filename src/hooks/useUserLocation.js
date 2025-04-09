@@ -1,29 +1,35 @@
 import { useState, useEffect } from "react";
 
-const useUserLocation = (pois) => {
-  const [userLocation, setUserLocation] = useState(null);
+const useUserLocation = (pois, externalLocation = null) => {
+  const [userLocation, setUserLocation] = useState(externalLocation || null);
   const [nearestPOI, setNearestPOI] = useState(null);
 
   useEffect(() => {
-    if ("geolocation" in navigator) {
+    if (externalLocation) {
+      setUserLocation(externalLocation);
+      findNearestPOI(externalLocation.lat, externalLocation.lng);
+    }
+
+    else if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(async (position) => {
         const lat = position.coords.latitude;
         const lng = position.coords.longitude;
         setUserLocation({ lat, lng });
 
-        // obtain place names
-        const response = await fetch(
-          
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/-6.2603,53.3498.json?access_token=pk.eyJ1IjoidmVyaWZpZWRmaW5uIiwiYSI6ImNtN21tdWQ2ZjBqcm8ycnIwNXFwN2Z4bGcifQ.BckuIZ-IAbwTNq6oaIunGg`
-        );
-        const data = await response.json();
-        console.log("User Location:", data.features[0]?.place_name);
+        // try {
+        //   const response = await fetch(
+        //     `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=pk.eyJ1IjoidmVyaWZpZWRmaW5uIiwiYSI6ImNtN21tdWQ2ZjBqcm8ycnIwNXFwN2Z4bGcifQ.BckuIZ-IAbwTNq6oaIunGg`
+        //   );
+        //   const data = await response.json();
+        //   console.log("User Location:", data.features[0]?.place_name);
 
-        // Calculate the nearest POI
-        findNearestPOI(lat, lng);
+        //   findNearestPOI(lat, lng);
+        // } catch (error) {
+        //   console.error("Error fetching geocoding data:", error);
+        // }
       });
     }
-  }, []);
+  }, [externalLocation]);  // triggers when externalLocation changes
 
   const findNearestPOI = (lat, lng) => {
     let nearest = null;
@@ -46,3 +52,4 @@ const useUserLocation = (pois) => {
 };
 
 export default useUserLocation;
+

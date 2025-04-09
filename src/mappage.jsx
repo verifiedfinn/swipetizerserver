@@ -18,10 +18,13 @@ const MapPage = () => {
   const mapContainerRef = useRef(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const markerRef = useRef(null);
-  
-  // Use Hook to get user location and nearest POI
-  const { userLocation, nearestPOI } = useUserLocation(pois);
+  const mapRef = useRef(null);
+  const [loading, setLoading] = useState(true);
 
+  // Use Hook to get user location
+  const { userLocation } = useUserLocation(pois);
+
+  // UseEffect for initializing map
   useEffect(() => {
     const mapInstance = new mapboxgl.Map({
       container: mapContainerRef.current,
@@ -29,6 +32,8 @@ const MapPage = () => {
       center: [-6.2603, 53.3498], // Default: Dublin
       zoom: 14,
     });
+
+    mapRef.current = mapInstance;
 
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
@@ -55,22 +60,71 @@ const MapPage = () => {
     return () => mapInstance.remove();
   }, []);
 
+  useEffect(() => {
+    // Ensure that map updates occur only after userLocation updates
+    if (userLocation && mapRef.current && !selectedLocation) {
+      setLoading(false); // stop loading
+      console.log("Focusing on user location...");
+      console.log("User Location:", userLocation);
+
+      mapRef.current.flyTo({
+        center: [userLocation.lng, userLocation.lat],
+        zoom: 14,
+      });
+
+      if (markerRef.current) {
+        markerRef.current.remove();
+      }
+
+      markerRef.current = new mapboxgl.Marker()
+        .setLngLat([userLocation.lng, userLocation.lat])
+        .addTo(mapRef.current);
+    }
+  }, [userLocation, selectedLocation]);  // listen to changes of userLocation selectedLocation
+
+  const focusOnUserLocation = () => {
+    console.log("Focusing on user location...");
+    if (userLocation && mapRef.current) {
+      console.log("User Location:", userLocation);
+      mapRef.current.flyTo({
+        center: [userLocation.lng, userLocation.lat],
+        zoom: 14,
+      });
+
+      // remove the marker before
+      if (markerRef.current) {
+        markerRef.current.remove();
+      }
+
+      // create a new marker
+      markerRef.current = new mapboxgl.Marker()
+        .setLngLat([userLocation.lng, userLocation.lat])
+        .addTo(mapRef.current);
+    }
+  };
+
   return (
     <div className="map-page">
       <h1>Location Selection</h1>
 
+      {loading && <p>Loading your location...</p>}
+
       <div ref={mapContainerRef} style={{ width: "100%", height: "500px" }}></div>
 
-      {userLocation && (
+      {selectedLocation ? (
+        <p>📍 Selected Location: {selectedLocation.lat}, {selectedLocation.lng}</p>
+      ) : userLocation ? (
         <p>📍 Your Location: {userLocation.lat}, {userLocation.lng}</p>
-      )}
-
-      {nearestPOI && (
-        <p>🏠 Nearest POI: {nearestPOI.name} ({nearestPOI.lat}, {nearestPOI.lng})</p>
+      ) : (
+        <p>📍 Loading location...</p>
       )}
 
       <div className="back-button">
         <Link to="/">⬅ Go Back</Link>
+      </div>
+
+      <div className="focus-button">
+        <button onClick={focusOnUserLocation}>📍 Use My Location</button>
       </div>
     </div>
   );
