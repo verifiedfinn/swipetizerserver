@@ -29,15 +29,18 @@ const FilterPage = () => {
       dietaryRestrictions,
       cuisinePreferences,
     };
-
+  
+    // Generate a random session token
+    const session_token = Math.random().toString(36).substring(2, 8).toUpperCase();
+  
     Axios.post('http://localhost:3001/create-session', {
-      user_id: 1, // Replace with actual user ID if logged in
+      user_id: 1, // Replace with actual user ID if you have auth
+      session_token,
       preferences,
     })
       .then((response) => {
-        const { session_token } = response.data;
         setSessionCode(session_token);
-        navigate('/slide-deck', { state: { sessionCode: session_token } });
+        navigate('/home', { state: { sessionCode: session_token } });
       })
       .catch((error) => {
         console.error('❌ Error creating session:', error);
