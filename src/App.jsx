@@ -84,6 +84,7 @@ function AppContent() {
           sessionCode ? (
             <>
               <h1>Swipe Deck</h1>
+              <h2>Session code: {sessionCode}</h2>
               {swipeDirection && (
                 <motion.div
                   className={`action ${swipeDirection}`}
@@ -95,40 +96,44 @@ function AppContent() {
                 </motion.div>
               )}
 
-              <div className="deck">
-                <AnimatePresence>
-                  {cards.map((card, index) => (
-                    <motion.div
-                      key={card.name}
-                      className={`card ${getCardColor(index)}`}
-                      drag="x"
-                      dragConstraints={{ left: 0, right: 0 }}
-                      dragElastic={0.5}
-                      onDragEnd={(event, info) => {
-                        if (info.velocity.x > 0.5 || info.offset.x > 100) {
-                          handleSwipe("right", index);
-                        } else if (info.velocity.x < -0.5 || info.offset.x < -100) {
-                          handleSwipe("left", index);
-                        }
-                      }}
-                      initial={{ scale: 1, y: index * 10, zIndex: cards.length - index }}
-                      animate={{ scale: 1, y: index * 10, zIndex: cards.length - index }}
-                      exit={{
-                        x: swipeDirection === "right" ? 700 : -700,
-                        rotate: swipeDirection === "right" ? 25 : -25,
-                        opacity: 0,
-                      }}
-                      whileDrag={{ scale: 1.1 }}
-                    >
-                      <h2>{card.name}</h2>
-                      <p>City: {card.city}</p>
-                      <p>Cuisine: {card["cuisine style"].join(", ")}</p>
-                      <p>Rating: {card.rating}</p>
-                      <p>Price: {card["price range"]}</p>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
+<div className="deck">
+  <AnimatePresence>
+    {cards.map((card, index) => (
+      <motion.div
+        key={card.name}
+        className={`card-ui`}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.5}
+        onDragEnd={(event, info) => {
+          if (info.velocity.x > 0.5 || info.offset.x > 100) {
+            handleSwipe("right", index);
+          } else if (info.velocity.x < -0.5 || info.offset.x < -100) {
+            handleSwipe("left", index);
+          }
+        }}
+        initial={{ scale: 1, y: index * 10, zIndex: cards.length - index }}
+        animate={{ scale: 1, y: index * 10, zIndex: cards.length - index }}
+        exit={{
+          x: swipeDirection === "right" ? 700 : -700,
+          rotate: swipeDirection === "right" ? 15 : -15,
+          opacity: 0,
+        }}
+        whileDrag={{ scale: 1.05 }}
+      >
+        {/* <img className="card-img" src={card.image} alt={card.name} /> */}
+        <img className="card-img" src="./images/bloom.jpg" alt={card.name} /> 
+        <div className="card-body">
+          <h2>{card.name}</h2>
+          <p className="tag city">{card.city}</p>
+          <p className="tag cuisine">{card["cuisine style"].join(", ")}</p>
+          <p className="tag price">{card["price range"]}</p>
+          <p className="tag rating">⭐ {card.rating}</p>
+        </div>
+      </motion.div>
+    ))}
+  </AnimatePresence>
+</div>
             </>
           ) : null
         } />

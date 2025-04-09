@@ -4,7 +4,8 @@
       "city": "Dublin",
       "cuisine style": ["Irish", "European"],
       "rating": "4.5",
-      "price range": "$$-$$$"
+      "price range": "$$-$$$",
+      "image": "/images/bloom.jpg"
     },
     {
       "name": "The Vintage Kitchen",
