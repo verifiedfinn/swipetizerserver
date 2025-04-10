@@ -79,7 +79,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/session-choice" element={<SessionChoice />} />
         <Route path="/filter-page" element={<FilterPage />} />
-
+        <Route path="/swipe" element={<SwipePage />} />
         <Route path="/home" element={
           sessionCode ? (
             <>

@@ -72,27 +72,27 @@ const WaitingRoom = () => {
   }, [sessionCode]);
 
   // check if sessionlaunched 
-  useEffect(() => {
-    if (isCreator) return; // don't needto check if user is the creator
-    
-    const checkSessionStatus = async () => {
-      try {
-        const response = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/status`);
-        
-        if (response.data && response.data.status === 'active') {
-          // if session is active go to swipe page
-          navigate('/home');
-        }
-      } catch (err) {
-        console.error("Error checking session status:", err);
+useEffect(() => {
+  if (isCreator) return; // don't need to check if user is the creator
+  
+  const checkSessionStatus = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/status`);
+      
+      if (response.data && response.data.status === 'active') {
+        // redirect to the swiping page if the session is active
+        navigate('/swipe');
       }
-    };
-    
-    // poll for the session status
-    const statusInterval = setInterval(checkSessionStatus, 2000);
-    
-    return () => clearInterval(statusInterval);
-  }, [sessionCode, isCreator, navigate]);
+    } catch (err) {
+      console.error("Error checking session status:", err);
+    }
+  };
+  
+  // poll for the session status
+  const statusInterval = setInterval(checkSessionStatus, 2000);
+  
+  return () => clearInterval(statusInterval);
+}, [sessionCode, isCreator, navigate]);
 
   // handle copying session code
   const copySessionCode = () => {
@@ -110,7 +110,7 @@ const WaitingRoom = () => {
   const handleLaunchSession = async () => {
     try {
       await axios.post(`http://localhost:3001/api/sessions/${sessionCode}/launch`);
-      navigate('/home');
+      navigate('/swipe'); 
     } catch (err) {
       console.error("Error launching session:", err);
       setError("Failed to launch session. Please try again.");
