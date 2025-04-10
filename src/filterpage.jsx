@@ -40,12 +40,12 @@ const FilterPage = () => {
     })
       .then((response) => {
         setSessionCode(session_token);
-        navigate('/home', { state: { sessionCode: session_token } });
+        navigate(`/waiting-room?code=${session_token}`);
       })
       .catch((error) => {
         console.error('❌ Error creating session:', error);
       });
-  };
+    };
 
   return (
     <div className="filter-page">
