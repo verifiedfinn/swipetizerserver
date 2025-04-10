@@ -7,7 +7,9 @@ import Register from './register.jsx';
 import StartScreen from './startscreen.jsx';
 import SessionChoice from './sessionchoice.jsx';
 import FilterPage from './filterpage.jsx';
+import WaitingRoom from './WaitingRoom.jsx';
 import "./styles.css";
+import SwipePage from './SwipePage.jsx';
 
 function AppContent() {
   const [cards, setCards] = useState([]);
@@ -80,6 +82,7 @@ function AppContent() {
         <Route path="/session-choice" element={<SessionChoice />} />
         <Route path="/filter-page" element={<FilterPage />} />
         <Route path="/swipe" element={<SwipePage />} />
+        <Route path="/waitingroom" element={<WaitingRoom />} />
         <Route path="/home" element={
           sessionCode ? (
             <>
