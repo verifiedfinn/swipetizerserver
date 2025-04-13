@@ -8,6 +8,7 @@ import StartScreen from './startscreen.jsx';
 import SessionChoice from './sessionchoice.jsx';
 import FilterPage from './filterpage.jsx';
 import WaitingRoom from './WaitingRoom.jsx';
+
 import "./styles.css";
 import SwipePage from './SwipePage.jsx';
 
@@ -124,11 +125,10 @@ function AppContent() {
         }}
         whileDrag={{ scale: 1.05 }}
       >
-        {/* <img className="card-img" src={card.image} alt={card.name} /> */}
-        <img className="card-img" src="./images/bloom.jpg" alt={card.name} /> 
+        <img className="card-img" src={card.image} alt={card.name} />
         <div className="card-body">
           <h2>{card.name}</h2>
-          <p className="tag city">{card.city}</p>
+          <p className="tag city">{card.City}</p>
           <p className="tag cuisine">{card["cuisine style"].join(", ")}</p>
           <p className="tag price">{card["price range"]}</p>
           <p className="tag rating">⭐ {card.rating}</p>
