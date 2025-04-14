@@ -23,21 +23,6 @@ h1 {
   position: relative;
 }
 
-/*
-.card {
-  width: 300px;
-  height: 400px;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-  text-align: left;
-  position: absolute;
-  will-change: transform;
-  background-color: white;
-  border: 4px solid #ccc;
-  font-size: 18px;
-  line-height: 1.5;
-} */
 .card-ui {
   width: 320px;
   height: 460px;
@@ -153,10 +138,11 @@ h1 {
 
 /* Like Dislike Styling */
 .action {
-  position: fixed;
-  top: 10%;
-  left: 50%;
+  /* position: fixed;
+  top: 20%;
+  left: 25%;
   transform: translateX(-50%);
+  z-index: 1; */
   font-size: 30px;
   font-weight: bold;
   padding: 12px 24px;
@@ -166,11 +152,21 @@ h1 {
 }
 
 .action.right {
+  position: fixed;
+  top: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
   background-color: #32cd32; /* Liked Green */
   color: white;
 }
 
 .action.left {
+  position: fixed;
+  top: 25%;
+  left: 40%;
+  transform: translateX(-50%);
+  z-index: 1;
   background-color: #ff6347; /* Dislike Red */
   color: white;
 }
