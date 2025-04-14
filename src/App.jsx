@@ -54,11 +54,12 @@ function AppContent() {
     }, 300);
   };
 
-  const getCardColor = (index) => {
-    const colorClasses = ["orange", "red", "green", "brown", "cheese-orange"];
-    if (index === 0 || index === cards.length - 1) return "orange";
-    return colorClasses[index % colorClasses.length];
-  };
+  //This is no longer needed 
+  // const getCardColor = (index) => {
+  //   const colorClasses = ["orange", "red", "green", "brown", "cheese-orange"];
+  //   if (index === 0 || index === cards.length - 1) return "orange";
+  //   return colorClasses[index % colorClasses.length];
+  // };
 
   if (loading) {
     return (
@@ -124,15 +125,47 @@ function AppContent() {
           opacity: 0,
         }}
         whileDrag={{ scale: 1.05 }}
+        style={{
+          backgroundImage: `linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.6) 0%,
+            rgba(0, 0, 0, 0.4) 30%,
+            rgba(0, 0, 0, 0.0) 50%
+          ), url(${card.image})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
       >
-        <img className="card-img" src={card.image} alt={card.name} />
+        {/* <img className="card-img" src={card.image} alt={card.name} />
         <div className="card-body">
           <h2>{card.name}</h2>
           <p className="tag city">{card.City}</p>
           <p className="tag cuisine">{card["cuisine style"].join(", ")}</p>
           <p className="tag price">{card["price range"]}</p>
           <p className="tag rating">⭐ {card.rating}</p>
-        </div>
+        </div> */}
+
+
+        {/* <div className="card-body">
+    <h2>{card.name}</h2>
+    <p className="tag city">{card.city}</p>
+    <p className="tag cuisine">{card["cuisine style"].join(", ")}</p>
+    <p className="tag price">{card["price range"]}</p>
+    <p className="tag rating">⭐ {card.rating}</p>
+  </div> */}
+
+   <div className="card-body">
+    <div className="top-row">
+      <h2>{card.name}</h2>
+      <p className="tag price">{card["price range"]}</p>
+    </div>
+    <div className="bottom-row">
+      <p className="tag rating">⭐ {card.rating}</p>
+      <p className="tag cuisine">{card["cuisine style"].join(", ")}</p>
+    </div>
+    </div>
+
       </motion.div>
     ))}
   </AnimatePresence>
