@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, act } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
 import MapPage from "./mappage.jsx";
@@ -54,13 +54,6 @@ function AppContent() {
     }, 300);
   };
 
-  //This is no longer needed 
-  // const getCardColor = (index) => {
-  //   const colorClasses = ["orange", "red", "green", "brown", "cheese-orange"];
-  //   if (index === 0 || index === cards.length - 1) return "orange";
-  //   return colorClasses[index % colorClasses.length];
-  // };
-
   if (loading) {
     return (
       <div className="loading-page">
@@ -103,71 +96,59 @@ function AppContent() {
 
 <div className="deck">
   <AnimatePresence>
-    {cards.map((card, index) => (
-      <motion.div
-        key={card.name}
-        className={`card-ui`}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.5}
-        onDragEnd={(event, info) => {
-          if (info.velocity.x > 0.5 || info.offset.x > 100) {
-            handleSwipe("right", index);
-          } else if (info.velocity.x < -0.5 || info.offset.x < -100) {
-            handleSwipe("left", index);
-          }
-        }}
-        initial={{ scale: 1, y: index * 10, zIndex: cards.length - index }}
-        animate={{ scale: 1, y: index * 10, zIndex: cards.length - index }}
-        exit={{
-          x: swipeDirection === "right" ? 700 : -700,
-          rotate: swipeDirection === "right" ? 15 : -15,
-          opacity: 0,
-        }}
-        whileDrag={{ scale: 1.05 }}
-        style={{
-          backgroundImage: `linear-gradient(
-            to top,
-            rgba(0, 0, 0, 0.6) 0%,
-            rgba(0, 0, 0, 0.4) 30%,
-            rgba(0, 0, 0, 0.0) 50%
-          ), url(${card.image})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-        }}
-      >
-        {/* <img className="card-img" src={card.image} alt={card.name} />
-        <div className="card-body">
-          <h2>{card.name}</h2>
-          <p className="tag city">{card.City}</p>
-          <p className="tag cuisine">{card["cuisine style"].join(", ")}</p>
-          <p className="tag price">{card["price range"]}</p>
-          <p className="tag rating">⭐ {card.rating}</p>
-        </div> */}
-
-
-        {/* <div className="card-body">
-    <h2>{card.name}</h2>
-    <p className="tag city">{card.city}</p>
-    <p className="tag cuisine">{card["cuisine style"].join(", ")}</p>
-    <p className="tag price">{card["price range"]}</p>
-    <p className="tag rating">⭐ {card.rating}</p>
-  </div> */}
-
-   <div className="card-body">
+  {cards.slice(-3).map((card, index) => {
+  const actualIndex = cards.length - 3 + index;
+  return (
+    <motion.div
+      key={card.name}
+      className={`card-ui`}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.5}
+      onDragEnd={(event, info) => {
+        if (info.velocity.x > 0.5 || info.offset.x > 100) {
+          handleSwipe("right", actualIndex);
+        } else if (info.velocity.x < -0.5 || info.offset.x < -100) {
+          handleSwipe("left", actualIndex);
+        }
+      }}
+      initial={{ scale: 1, y: index * 10, zIndex: index }}
+      animate={{ scale: 1, y: index * 10, zIndex: index }}
+      exit={{
+        x: swipeDirection === "right" ? 700 : -700,
+        rotate: swipeDirection === "right" ? 15 : -15,
+        opacity: 0,
+      }}
+      whileDrag={{ scale: 1.05 }}
+      style={{
+        backgroundImage: `linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.6) 0%,
+          rgba(0, 0, 0, 0.4) 30%,
+          rgba(0, 0, 0, 0.0) 50%
+        ), url(${card.image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+      }}
+    >
+  
+  <div className="card-body">
     <div className="top-row">
       <h2>{card.name}</h2>
       <p className="tag price">{card["price range"]}</p>
     </div>
     <div className="bottom-row">
       <p className="tag rating">⭐ {card.rating}</p>
-      <p className="tag cuisine">{card["cuisine style"].join(", ")}</p>
+      <p className="tag cuisine">
+    {Array.isArray(card["cuisine style"]) ? card["cuisine style"].join(", ") : ""}
+  </p>
     </div>
     </div>
 
       </motion.div>
-    ))}
+  );
+})}
   </AnimatePresence>
 </div>
             </>
