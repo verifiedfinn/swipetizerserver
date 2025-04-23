@@ -15,7 +15,7 @@ function Register() {
       return;
     }
 
-    Axios.post('http://localhost:3001/register', {
+    Axios.post('/register', {
       username: email,
       password: password
     })

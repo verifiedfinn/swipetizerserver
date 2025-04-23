@@ -1,10 +1,10 @@
+require("dotenv").config(); // Load .env config
 const express = require("express");
 const mysql = require('mysql2');
 const fs = require("fs");
 const cors = require("cors");
 const path = require("path");
 const bcrypt = require("bcrypt");
-require("dotenv").config(); // Load .env config
 
 const app = express();
 app.use(cors());
@@ -175,6 +175,6 @@ app.get("*", (req, res) => {
 
 // ---------------------- START SERVER ----------------------
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
 });
