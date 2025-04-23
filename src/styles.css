@@ -545,6 +545,7 @@ h1 {
 }
 
 .create-session-btn {
+  margin: 30px auto 0; /* top: 30px, sides: auto, bottom: 0 */
   display: block;
   width: 100%;
   padding: 14px 0;
@@ -556,11 +557,34 @@ h1 {
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  margin-top: 30px;
 }
 
 .create-session-btn:hover {
   background-color: #e25d5d;
+}
+
+/* Force sliders to stay within the container */
+.noUi-target {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 auto !important;
+}
+
+/* Ensure tooltips don't overflow */
+.noUi-tooltip {
+  max-width: 80px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  font-size: 12px !important;
+  transform: translateX(-50%) !important; /* Center tooltips */
+}
+
+/* Optional: force slider wrapper width */
+.slider-wrapper {
+  width: 100%;
+  overflow-x: hidden;
+  position: relative;
 }
 
 /* Session Code Display */

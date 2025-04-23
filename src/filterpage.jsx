@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Nouislider from 'nouislider-react';
-import 'nouislider/dist/nouislider.css';
+import Slider from '@mui/material/Slider';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 import Axios from 'axios';
 
 const FilterPage = () => {
@@ -29,37 +30,29 @@ const FilterPage = () => {
       dietaryRestrictions,
       cuisinePreferences,
     };
-  
-    // Generate a random session token
+
     const session_token = Math.random().toString(36).substring(2, 8).toUpperCase();
-  
+
     Axios.post('http://localhost:3001/create-session', {
-      user_id: 1, // Replace with actual user ID if you have auth
+      user_id: 1,
       session_token,
       preferences,
     })
-      .then((response) => {
+      .then(() => {
         setSessionCode(session_token);
         navigate(`/waiting-room?code=${session_token}`);
       })
       .catch((error) => {
         console.error('❌ Error creating session:', error);
       });
-    };
+  };
 
   return (
     <div className="filter-page">
-      {/* === SESSION CODE UI === */}
       {sessionCode && (
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <h3>Session Code</h3>
-          <div
-            style={{
-              fontSize: '24px',
-              fontWeight: 'bold',
-              letterSpacing: '2px',
-            }}
-          >
+          <div style={{ fontSize: '24px', fontWeight: 'bold', letterSpacing: '2px' }}>
             {sessionCode}
           </div>
         </div>
@@ -68,98 +61,75 @@ const FilterPage = () => {
       <h1>SESSION PREFERENCES</h1>
 
       <div className="section">
-        <span className="label">Maximum Distance</span>
-        <span className="value">{distance} km</span>
-        <Nouislider
-          range={{ min: 1, max: 10 }}
-          start={[distance]}
-          step={1}
-          tooltips
-          onSlide={(values) => setDistance(Math.round(values[0]))}
+        <Typography gutterBottom>Maximum Distance: {distance} km</Typography>
+        <Slider
+          value={distance}
+          onChange={(e, value) => setDistance(value)}
+          min={1}
+          max={10}
+          valueLabelDisplay="auto"
+          sx={{ color: '#f37474' }}
         />
       </div>
-      <hr />
 
       <div className="section">
-        <span className="label">Price Range</span>
-        <span className="value">
-          {['€', '€€', '€€€', '€€€€', '€€€€€']
-            .slice(priceRange[0] - 1, priceRange[1])
-            .join(' - ')}
-        </span>
-        <Nouislider
-          range={{ min: 1, max: 5 }}
-          start={priceRange}
+        <Typography gutterBottom>
+          Price Range: {['€', '€€', '€€€', '€€€€', '€€€€€'].slice(priceRange[0] - 1, priceRange[1]).join(' - ')}
+        </Typography>
+        <Slider
+          value={priceRange}
+          onChange={(e, value) => setPriceRange(value)}
+          valueLabelDisplay="auto"
           step={1}
-          tooltips
-          connect
-          onSlide={(values) => setPriceRange(values.map(Number))}
+          min={1}
+          max={5}
+          sx={{ color: '#f37474' }}
         />
       </div>
-      <hr />
 
       <div className="section">
-        <span className="label">Ratings Range</span>
-        <span className="value">
-          {['*', '**', '***', '****', '*****']
-            .slice(ratingRange[0] - 1, ratingRange[1])
-            .join(' - ')}
-        </span>
-        <Nouislider
-          range={{ min: 1, max: 5 }}
-          start={ratingRange}
+        <Typography gutterBottom>
+          Rating Range: {['★', '★★', '★★★', '★★★★', '★★★★★'].slice(ratingRange[0] - 1, ratingRange[1]).join(' - ')}
+        </Typography>
+        <Slider
+          value={ratingRange}
+          onChange={(e, value) => setRatingRange(value)}
+          valueLabelDisplay="auto"
           step={1}
-          tooltips
-          connect
-          onSlide={(values) => setRatingRange(values.map(Number))}
+          min={1}
+          max={5}
+          sx={{ color: '#f37474' }}
         />
       </div>
-      <hr />
 
       <div className="section">
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div style={{ width: '45%' }}>
             <h3>Dietary Restrictions</h3>
-            {['Vegetarian', 'Vegan', 'Gluten-Free', 'Fast-Casual'].map(
-              (restriction) => (
-                <label key={restriction}>
-                  <input
-                    type="checkbox"
-                    checked={dietaryRestrictions.includes(restriction)}
-                    onChange={() =>
-                      handleCheckboxChange(setDietaryRestrictions, restriction)
-                    }
-                  />{' '}
-                  {restriction}
-                </label>
-              )
-            )}
+            {['Vegetarian', 'Vegan', 'Gluten-Free', 'Fast-Casual'].map((r) => (
+              <label key={r}>
+                <input
+                  type="checkbox"
+                  checked={dietaryRestrictions.includes(r)}
+                  onChange={() => handleCheckboxChange(setDietaryRestrictions, r)}
+                />{' '}
+                {r}
+              </label>
+            ))}
           </div>
-
-          <div
-            style={{
-              borderLeft: '2px solid',
-              height: '200px',
-              marginTop: '10px',
-            }}
-          ></div>
-
+          <div style={{ borderLeft: '2px solid', height: '200px', marginTop: '10px' }}></div>
           <div style={{ width: '45%' }}>
             <h3>Cuisine Preferences</h3>
-            {['Italian', 'Japanese', 'Mexican', 'Pub fare, potatoes and pints'].map(
-              (cuisine) => (
-                <label key={cuisine}>
-                  <input
-                    type="checkbox"
-                    checked={cuisinePreferences.includes(cuisine)}
-                    onChange={() =>
-                      handleCheckboxChange(setCuisinePreferences, cuisine)
-                    }
-                  />{' '}
-                  {cuisine}
-                </label>
-              )
-            )}
+            {['Italian', 'Japanese', 'Mexican', 'Pub fare, potatoes and pints'].map((c) => (
+              <label key={c}>
+                <input
+                  type="checkbox"
+                  checked={cuisinePreferences.includes(c)}
+                  onChange={() => handleCheckboxChange(setCuisinePreferences, c)}
+                />{' '}
+                {c}
+              </label>
+            ))}
           </div>
         </div>
       </div>
