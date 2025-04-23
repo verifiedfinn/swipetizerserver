@@ -77,7 +77,7 @@ function AppContent() {
         <Route path="/session-choice" element={<SessionChoice />} />
         <Route path="/filter-page" element={<FilterPage />} />
         <Route path="/swipe" element={<SwipePage />} />
-        <Route path="/waitingroom" element={<WaitingRoom />} />
+        <Route path="/waiting-room" element={<WaitingRoom />} />
         <Route path="/home" element={
           sessionCode ? (
             <>

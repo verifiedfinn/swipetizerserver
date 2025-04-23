@@ -55,7 +55,7 @@ const WaitingRoom = () => {
         const response = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/participants`);
         
         if (response.data) {
-          setParticipants(response.data);
+          setParticipants(Array.isArray(response.data) ? response.data : []);
         }
       } catch (err) {
         console.error("Error fetching participants:", err);

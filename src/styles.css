@@ -604,6 +604,7 @@ h1 {
   letter-spacing: 2px;
   color: #222;
   margin-top: 8px;
+  align: center;
 }
 
 .session-code button {
@@ -685,6 +686,8 @@ h1 {
   height: 100vh;            /* Full viewport height */
   flex-direction: column; 
 }
+
+
 
 button {
   display: flex;/* styles.css */
@@ -786,4 +789,12 @@ button {
 /* button spacing */
 .button-margin-top {
   margin-top: 15px;
+}
+
+/* Universal was making flexbox resulting in the uncentering of the actual box */
+
+.session-code > button {
+  display: inline-block !important;
+  margin: 10px auto !important;
+  text-align: center;
 }
