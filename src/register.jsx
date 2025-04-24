@@ -62,10 +62,10 @@ function Register() {
           />
         </div>
 
-        <button type="submit" onClick={register}>
-          Register
-        </button>
-
+        <div className="submit-container">
+        <button type="submit" onClick={register}>Register</button>
+        </div>
+        
         {status && <p style={{ marginTop: '10px' }}>{status}</p>}
       </div>
     </div>
