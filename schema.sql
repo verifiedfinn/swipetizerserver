@@ -69,3 +69,13 @@ CREATE TABLE IF NOT EXISTS restaurants (
   rating FLOAT,
   price_range VARCHAR(10)
 );
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  session_token VARCHAR(255) UNIQUE,
+  device_info TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);

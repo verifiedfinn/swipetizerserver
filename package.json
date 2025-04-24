@@ -33,6 +33,8 @@
         "react-router-dom": "^7.4.0",
         "react-swipeable": "^7.0.2",
         "react-tinder-card": "^1.6.4",
+        "socket.io": "^4.8.1",
+        "socket.io-client": "^4.8.1",
         "vite": "^6.1.0"
     },
     "devDependencies": {

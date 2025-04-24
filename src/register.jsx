@@ -15,15 +15,22 @@ function Register() {
       return;
     }
 
-    Axios.post('/register', {
+    Axios.post('http://localhost:3001/register', {
       username: email,
       password: password
     })
-      .then((response) => {
-        console.log(response.data);
-        setStatus("✅ Registered successfully!");
-        setTimeout(() => navigate('/session-choice'), 1000); // Small delay for UX
-      })
+    .then((response) => {
+      console.log(response.data);
+    
+      // Store user in localStorage
+      if (response.data.user) {
+        localStorage.setItem("userId", response.data.user.id);
+        localStorage.setItem("username", response.data.user.name);
+      }
+    
+      setStatus("✅ Registered successfully!");
+      setTimeout(() => navigate('/session-choice'), 1000);
+    })
       .catch((error) => {
         console.error(error);
         setStatus("❌ Registration failed.");

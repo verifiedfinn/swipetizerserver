@@ -4,7 +4,7 @@ import Axios from "axios";
 import "./styles.css";
 
 function Login() {
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -12,19 +12,27 @@ function Login() {
 
   const login = () => {
     Axios.post("http://localhost:3001/login", {
-      username: username,
-      password: password,
-    }).then((response) => {
-      if (response.data.message) {
-        setLoginStatus(response.data.message); 
-      } else {
-        setLoginStatus(`Welcome, ${response.data[0].username}!`);
-        navigate("/home"); 
-      }
-    }).catch(error => {
-      console.error("Login error:", error);
-      setLoginStatus("Error logging in");
-    });
+      username,
+      password,
+    })
+      .then((response) => {
+        if (response.data.message === "Login successful") {
+          const user = response.data.user;
+
+          // ✅ Store in localStorage
+          localStorage.setItem("userId", user.id);
+          localStorage.setItem("username", user.name);
+
+          setLoginStatus(`Welcome, ${user.name}!`);
+          navigate("/session-choice");
+        } else {
+          setLoginStatus(response.data.message || "Login failed.");
+        }
+      })
+      .catch((error) => {
+        console.error("Login error:", error);
+        setLoginStatus("❌ Error logging in.");
+      });
   };
 
   return (
@@ -38,6 +46,7 @@ function Login() {
           <input
             type="email"
             placeholder="Email"
+            value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
         </div>
@@ -45,6 +54,7 @@ function Login() {
           <input
             type="password"
             placeholder="Password"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
@@ -54,7 +64,7 @@ function Login() {
         <button type="submit" onClick={login}>Log In</button>
       </div>
 
-      <h1>{loginStatus}</h1>
+      {loginStatus && <h1>{loginStatus}</h1>}
     </div>
   );
 }

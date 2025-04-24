@@ -1,129 +1,116 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3001'); // adjust for prod
 
 const WaitingRoom = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
-  // parse the session code from query params 
   const queryParams = new URLSearchParams(location.search);
   const sessionCode = queryParams.get('code') || '1234';
-  
-  // local state
+
   const [isCreator, setIsCreator] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
-  
-  // check the session status 
+
+  // Fetch session AND join socket room
   useEffect(() => {
-    const getSessionInfo = async () => {
+    const joinSession = async () => {
+      const storedUserId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+      const storedUsername = localStorage.getItem('username');
+      const fallbackId = `guest-${socket.id}`;
+      const fallbackUsername = `Guest ${Math.floor(Math.random() * 1000)}`;
+      const userId = storedUserId || fallbackId;
+      const username = storedUsername || fallbackUsername;
+  
       try {
-        setIsLoading(true);
-        
-        // get session details
-        const response = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}`);
-        
-        if (response.data) {
-          // check if current user is the creator
-          const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-          
-          if (userId && response.data.createdBy === parseInt(userId)) {
-            setIsCreator(true);
-          }
-        } else {
-          // if no session found, go to session creation page
-          navigate('/session');
-        }
+        const res = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}`);
+        const hostId = res.data?.createdBy;
+        const isHost = storedUserId && Number(storedUserId) === Number(hostId);
+  
+        setIsCreator(isHost);
+        console.log("🟢 You are host:", isHost);
+  
+        socket.emit("joinRoom", {
+          sessionCode,
+          user: {
+            id: userId,
+            username,
+            isCreator: isHost,
+          },
+        });
+  
+        const resP = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/participants`);
+        setParticipants(Array.isArray(resP.data) ? resP.data : []);
+        console.log("👥 Initial participants:", resP.data);
+  
       } catch (err) {
-        console.error("Error fetching session info:", err);
-        setError("Could not load session information. Please try again.");
+        console.error("❌ Failed to join session:", err);
+        setError("Failed to join session.");
+        navigate("/session");
       } finally {
         setIsLoading(false);
       }
     };
-    
-    getSessionInfo();
-  }, [sessionCode, navigate]);
   
-  // load the parpticpants
+    if (socket.connected) {
+      joinSession();
+    } else {
+      socket.on("connect", joinSession);
+    }
+  
+    return () => {
+      socket.emit("leave-session", sessionCode);
+      socket.off("connect", joinSession);
+    };
+  }, [sessionCode, navigate]);
+
+  // Listen for updates
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
-        const response = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/participants`);
-        
-        if (response.data) {
-          setParticipants(Array.isArray(response.data) ? response.data : []);
-        }
+        const res = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/participants`);
+        console.log("👥 Participants received:", res.data);
+        setParticipants(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
-        console.error("Error fetching participants:", err);
+        console.error("❌ Failed to fetch participants:", err);
       }
     };
-    
-    // fetch participants 
-    fetchParticipants();
-    
-    // poll to check for new participants
-    const interval = setInterval(fetchParticipants, 3000);
-    
-    return () => clearInterval(interval);
-  }, [sessionCode]);
 
-  // check if sessionlaunched 
-useEffect(() => {
-  if (isCreator) return; // don't need to check if user is the creator
-  
-  const checkSessionStatus = async () => {
-    try {
-      const response = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/status`);
-      
-      if (response.data && response.data.status === 'active') {
-        // redirect to the swiping page if the session is active
-        navigate('/swipe');
-      }
-    } catch (err) {
-      console.error("Error checking session status:", err);
-    }
-  };
-  
-  // poll for the session status
-  const statusInterval = setInterval(checkSessionStatus, 2000);
-  
-  return () => clearInterval(statusInterval);
-}, [sessionCode, isCreator, navigate]);
+    socket.on('participantUpdate', fetchParticipants);
+    socket.on('sessionStarted', () => navigate('/swipe'));
 
-  // handle copying session code
+    return () => {
+      socket.emit('leave-session', sessionCode);
+      socket.off('participantUpdate', fetchParticipants);
+      socket.off('sessionStarted');
+    };
+  }, [sessionCode, navigate]);
+
   const copySessionCode = () => {
-    navigator.clipboard.writeText(sessionCode)
-      .then(() => {
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      })
-      .catch(err => {
-        console.error('Failed to copy code:', err);
-      });
+    navigator.clipboard.writeText(sessionCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
-  // launch session
   const handleLaunchSession = async () => {
     try {
       await axios.post(`http://localhost:3001/api/sessions/${sessionCode}/launch`);
-      navigate('/swipe'); 
-    } catch (err) {
-      console.error("Error launching session:", err);
-      setError("Failed to launch session. Please try again.");
+      socket.emit('startSession', sessionCode);
+      navigate('/swipe');
+    } catch {
+      setError("Failed to launch session.");
     }
   };
 
-  // leave session
   const handleLeaveSession = async () => {
     try {
-      //  tell the server that the user is leaving if they are leaving
       await axios.post(`http://localhost:3001/api/sessions/${sessionCode}/leave`);
-    } catch (err) {
-      console.error("Error leaving session:", err);
     } finally {
       navigate('/session');
     }
@@ -137,16 +124,13 @@ useEffect(() => {
       </div>
     );
   }
-  
+
   if (error) {
     return (
       <div className="filter-page">
         <h1>Error</h1>
         <p className="error-message">{error}</p>
-        <button 
-          className="create-session-btn"
-          onClick={() => navigate('/session')}
-        >
+        <button className="create-session-btn" onClick={() => navigate('/session')}>
           Back to Session
         </button>
       </div>
@@ -156,8 +140,7 @@ useEffect(() => {
   return (
     <div className="filter-page">
       <h1>Waiting Room</h1>
-      
-      {/*  display session code*/}
+
       <div className="session-code">
         <h3>SESSION CODE</h3>
         <div className="code-box">{sessionCode}</div>
@@ -165,61 +148,50 @@ useEffect(() => {
           {copied ? 'Copied!' : 'Copy Code'}
         </button>
       </div>
-      
-      {/* participants section */}
+
       <div className="section">
         <div className="label">Participants ({participants.length})</div>
-        
         <div className="participants-container">
           {participants.length === 0 ? (
             <p className="waiting-message">Waiting for your friends to join...</p>
           ) : (
-            participants.map((participant, index) => (
-              <div key={index} className="participant-item">
+            participants.map((p, i) => (
+              <div key={i} className="participant-item">
                 <span className="participant-name">
-                  {participant.username || `Guest ${index + 1}`}
-                  {participant.isCreator && <span className="creator-badge">Host</span>}
+                  {p.username || `Guest ${i + 1}`}
+                  {p.isCreator && <span className="creator-badge">Host</span>}
+                  {(!p.id || isNaN(Number(p.id))) && (
+                    <span className="guest-badge">Guest</span>
+                  )}
                 </span>
               </div>
             ))
           )}
         </div>
       </div>
-      
+
       <hr />
-      
-      {/* waiting message */}
+
       <div className="section">
         <p className="waiting-message">
-          {isCreator 
-            ? "Waiting for your friends to join..." 
+          {isCreator
+            ? "Waiting for your friends to join..."
             : "Waiting for host to start the session..."}
         </p>
       </div>
-      
-      {/* action buttons */}
+
       {isCreator ? (
-        <button 
-          className="create-session-btn launch-button"
-          onClick={handleLaunchSession}
-          disabled={participants.length < 1}
-        >
+        <button className="create-session-btn launch-button" onClick={handleLaunchSession} disabled={participants.length < 2}>
           Launch Session
         </button>
       ) : (
-        <button 
-          className="create-session-btn waiting-button"
-          disabled={true}
-        >
+        <button className="create-session-btn waiting-button" disabled>
           Waiting for Host...
         </button>
       )}
-      
+
       <div className="button-margin-top">
-        <button 
-          className="create-session-btn cancel-button"
-          onClick={handleLeaveSession}
-        >
+        <button className="create-session-btn cancel-button" onClick={handleLeaveSession}>
           Leave Session
         </button>
       </div>

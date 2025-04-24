@@ -34,7 +34,7 @@ const FilterPage = () => {
     const session_token = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     Axios.post('http://localhost:3001/create-session', {
-      user_id: 1,
+      user_id: localStorage.getItem('userId') || sessionStorage.getItem('userId'),
       session_token,
       preferences,
     })

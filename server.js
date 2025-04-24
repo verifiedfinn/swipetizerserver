@@ -1,6 +1,6 @@
-require("dotenv").config(); // Load .env config
+require("dotenv").config();
 const express = require("express");
-const mysql = require('mysql2');
+const mysql = require("mysql2");
 const fs = require("fs");
 const cors = require("cors");
 const path = require("path");
@@ -11,17 +11,26 @@ app.use(cors());
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// Use environment-based DB config from .env
+const http = require("http").createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(http, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+const sessionParticipants = {};
+
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  multipleStatements: true 
+  multipleStatements: true
 });
 
-// Connect and initialize tables from schema.sql
 db.connect((err) => {
   if (err) {
     console.error("❌ Database connection failed:", err.stack);
@@ -29,7 +38,7 @@ db.connect((err) => {
   }
   console.log("✅ Connected to MySQL database");
 
-  const schema = fs.readFileSync('./schema.sql', 'utf8');
+  const schema = fs.readFileSync("./schema.sql", "utf8");
   db.query(schema, (err) => {
     if (err) {
       console.error("❌ Failed to initialize schema:", err);
@@ -37,6 +46,39 @@ db.connect((err) => {
       console.log("✅ All tables created or already exist.");
     }
   });
+});
+
+// ---------------------- SESSION DETAIL ROUTE ----------------------
+app.get("/api/sessions/:code", (req, res) => {
+  const code = req.params.code;
+
+  db.query(
+    "SELECT * FROM sessions WHERE session_token = ?",
+    [code],
+    (err, results) => {
+      if (err) {
+        console.error("❌ Error fetching session by code:", err);
+        return res.status(500).send({ message: "Server error" });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).send({ message: "Session not found" });
+      }
+
+      const session = results[0];
+      res.send({
+        ...session,
+        createdBy: session.user_id
+      });
+    }
+  );
+});
+
+// ---------------------- PARTICIPANTS ROUTE ----------------------
+app.get("/api/sessions/:code/participants", (req, res) => {
+  const code = req.params.code;
+  const participants = sessionParticipants[code] || [];
+  res.json(participants);
 });
 
 // ---------------------- RESTAURANTS ----------------------
@@ -63,11 +105,15 @@ app.post("/register", async (req, res) => {
       (err, result) => {
         if (err) {
           console.error("❌ Registration failed:", err);
-          res.status(500).send({ message: "Registration failed" });
-        } else {
-          console.log("✅ User registered:", result.insertId);
-          res.send({ message: "User registered successfully" });
+          return res.status(500).send({ message: "Registration failed" });
         }
+
+        const newUser = {
+          id: result.insertId,
+          name: username
+        };
+
+        res.send({ message: "User registered successfully", user: newUser });
       }
     );
   } catch (err) {
@@ -85,15 +131,11 @@ app.post("/login", (req, res) => {
     "SELECT * FROM users WHERE name = ?",
     [username],
     async (err, result) => {
-      if (err) {
-        console.error("❌ DB error:", err);
-        return res.send({ err });
-      }
+      if (err) return res.send({ err });
 
       if (result.length > 0) {
         const match = await bcrypt.compare(password, result[0].password_hash);
         if (match) {
-          console.log("✅ Login successful");
           res.send({ message: "Login successful", user: result[0] });
         } else {
           res.send({ message: "Invalid password" });
@@ -122,8 +164,8 @@ app.post("/create-session", (req, res) => {
         return res.status(500).send({ message: "Failed to create session" });
       }
 
-      console.log("✅ Session created:", session_token);
       res.send({ message: "Session created", session_code: session_token });
+      io.to(session_token).emit("participantUpdate");
     }
   );
 });
@@ -136,10 +178,7 @@ app.post("/join-session", (req, res) => {
     "SELECT * FROM sessions WHERE session_token = ?",
     [session_token],
     (err, result) => {
-      if (err) {
-        console.error("❌ Join session error:", err);
-        return res.status(500).send({ message: "DB error" });
-      }
+      if (err) return res.status(500).send({ message: "DB error" });
 
       if (result.length > 0) {
         res.send({ message: "Session found", session: result[0] });
@@ -150,7 +189,18 @@ app.post("/join-session", (req, res) => {
   );
 });
 
-// ---------------------- FILTER PREFERENCES ----------------------
+// ---------------------- LAUNCH SESSION ----------------------
+app.post("/api/sessions/:code/launch", (req, res) => {
+  const code = req.params.code;
+
+  // This emits to all connected clients in the room
+  io.to(code).emit("sessionStarted");
+
+  console.log(`🚀 Launch request received for session ${code}`);
+  res.send({ message: "Session launched successfully" });
+});
+
+// ---------------------- SAVE PREFERENCES ----------------------
 app.post("/save-preferences", (req, res) => {
   const { user_id, food_preferences } = req.body;
 
@@ -159,13 +209,54 @@ app.post("/save-preferences", (req, res) => {
     [JSON.stringify(food_preferences), user_id],
     (err) => {
       if (err) {
-        console.error("❌ Failed to save preferences:", err);
         return res.status(500).send({ message: "Error saving preferences" });
       }
 
       res.send({ message: "Preferences updated!" });
     }
   );
+});
+
+// ---------------------- SOCKET.IO HANDLERS ----------------------
+io.on("connection", (socket) => {
+  console.log("🟢 Client connected:", socket.id);
+
+  socket.on("joinRoom", ({ sessionCode, user }) => {
+    if (!sessionCode) {
+      console.warn("❗ joinRoom missing sessionCode");
+      return;
+    }
+  
+    socket.join(sessionCode);
+  
+    if (!sessionParticipants[sessionCode]) {
+      sessionParticipants[sessionCode] = [];
+    }
+  
+    const userId = user.id || `guest-${socket.id}`;
+    const username = user.username || `Guest ${Math.floor(Math.random() * 1000)}`;
+    const isCreator = Boolean(user.isCreator); // ✅ preserves value from frontend
+  
+    const alreadyInRoom = sessionParticipants[sessionCode].some(p => String(p.id) === String(userId));
+    if (!alreadyInRoom) {
+      sessionParticipants[sessionCode].push({ id: userId, username, isCreator });
+    }
+  
+    console.log(`🔗 ${username} joined room ${sessionCode} (Host: ${isCreator})`);
+    console.log("👥 Current participants:", sessionParticipants[sessionCode]);
+  
+    io.to(sessionCode).emit("participantUpdate");
+  });
+
+  socket.on("startSession", (sessionCode) => {
+    console.log(`🚀 Session started in room ${sessionCode}`);
+    io.to(sessionCode).emit("sessionStarted");
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔴 Client disconnected:", socket.id);
+    // Optionally remove the user from sessionParticipants here
+  });
 });
 
 // ---------------------- CATCH ALL ----------------------
@@ -175,6 +266,6 @@ app.get("*", (req, res) => {
 
 // ---------------------- START SERVER ----------------------
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+http.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server + Socket.IO running on http://0.0.0.0:${PORT}`);
 });

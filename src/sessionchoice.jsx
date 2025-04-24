@@ -8,8 +8,9 @@ const SessionChoice = () => {
   const navigate = useNavigate();
 
   const handleJoin = () => {
-    if (pin.trim() !== '') {
-      navigate(`/home?session=${pin}`);
+    const trimmed = pin.trim();
+    if (trimmed !== '') {
+      navigate(`/waiting-room?code=${trimmed}`); // tricky freaking link needs the hyphen inbetween waiting and room
     }
   };
 
