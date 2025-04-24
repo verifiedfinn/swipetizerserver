@@ -1,17 +1,24 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { io } from 'socket.io-client';
+
+const socket = io('http://localhost:3001'); // adjust for prod
 
 const SwipePage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const sessionCode = new URLSearchParams(location.search).get('code'); // get ?code=XYZ from URL
 
   const [restaurants, setRestaurants] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Total people in the session (hardcoded)
-  const participantsCount = 4;
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    // Load mock restaurant data when page loads
+    const stored = localStorage.getItem('userId') || sessionStorage.getItem('userId');
+    setUserId(stored || `guest-${socket.id}`);
+  }, []);
+
+  useEffect(() => {
     const mockRestaurants = [
       { id: 1, name: 'restaurant1', image: 'https://via.placeholder.com/300', price: '$$' },
       { id: 2, name: 'restaurant2', image: 'https://via.placeholder.com/300', price: '$$$' },
@@ -23,28 +30,37 @@ const SwipePage = () => {
     setRestaurants(mockRestaurants);
   }, []);
 
-// Handle swipe action
-const handleSwipe = (isRightSwipe) => {
+  // ✅ Listen for matchFound event
+  useEffect(() => {
+    socket.on('matchFound', ({ restaurantId, users }) => {
+      const match = restaurants.find(r => r.id === restaurantId);
+      if (match) {
+        console.log('🎉 MATCH FOUND:', match.name);
+        navigate('/match', { state: { restaurant: match, users } });
+      }
+    });
+
+    return () => socket.off('matchFound');
+  }, [restaurants, navigate]);
+
+  // ✅ Emit swipes
+  const handleSwipe = (isRightSwipe) => {
     const current = restaurants[currentIndex];
+    if (!current || !sessionCode || !userId) return;
 
     if (isRightSwipe) {
-      console.log(`User liked: ${current.name}`);
-
-      // Math logic: if over 50% liked it (simulate swipeRightCount)
-      const mockSwipeRightCount = Math.ceil(participantsCount / 2); // just simulate >= 50%
-
-      if (mockSwipeRightCount >= participantsCount / 2) {
-        // Jump to match page
-        navigate('/match', { state: { restaurant: current } });
-        return;
-      }
+      socket.emit('swipe', {
+        sessionCode,
+        userId,
+        restaurantId: current.id,
+        direction: 'right'
+      });
     }
 
-    // Go to next card
+    // move to next card
     setCurrentIndex((prev) => prev + 1);
   };
 
-  // When all cards are shown
   if (currentIndex >= restaurants.length) {
     return <h2 style={{ textAlign: 'center' }}>No more restaurants!</h2>;
   }
@@ -55,17 +71,12 @@ const handleSwipe = (isRightSwipe) => {
     <div className="swipe-page">
       <h2>Swipe on Restaurants</h2>
 
-      {/* Show restaurant info */}
       <div className="restaurant-card">
         <img src={current.image} alt={current.name} />
         <h3>{current.name}</h3>
         <p>{current.price}</p>
       </div>
 
-      {/* swipe function implent here */}
-      {/* react-tinder-card */}
-
-      {/* buttons*/}
       <div className="button-group">
         <button onClick={() => handleSwipe(false)}>❌ Skip</button>
         <button onClick={() => handleSwipe(true)}>❤️ Like</button>
