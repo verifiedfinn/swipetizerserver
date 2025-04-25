@@ -5,81 +5,147 @@ import { io } from 'socket.io-client';
 const socket = io('http://localhost:3001'); // adjust for prod
 
 const SwipePage = () => {
+  const [cards, setCards] = useState([]);
+  const [swipeDirection, setSwipeDirection] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const location = useLocation();
-  const sessionCode = new URLSearchParams(location.search).get('code'); // get ?code=XYZ from URL
 
   const [restaurants, setRestaurants] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [userId, setUserId] = useState(null);
+
+  // Total people in the session (hardcoded)
+  const participantsCount = 4;
 
   useEffect(() => {
-    const stored = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-    setUserId(stored || `guest-${socket.id}`);
+    const timer = setTimeout(() => setLoading(false), 1000);
+    fetch("/localdata.json")
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch data");
+        return response.json();
+      })    
+      .then((data) => setCards(data.reverse()))
+      .catch((error) => console.error("Error loading data:", error));
+    return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    const mockRestaurants = [
-      { id: 1, name: 'restaurant1', image: 'https://via.placeholder.com/300', price: '$$' },
-      { id: 2, name: 'restaurant2', image: 'https://via.placeholder.com/300', price: '$$$' },
-      { id: 3, name: 'restaurant3', image: 'https://via.placeholder.com/300', price: '$' },
-      { id: 4, name: 'restaurant4', image: 'https://via.placeholder.com/300', price: '$$' },
-      { id: 5, name: 'restaurant5', image: 'https://via.placeholder.com/300', price: '$$' },
-      { id: 6, name: 'restaurant6', image: 'https://via.placeholder.com/300', price: '$' },
-    ];
-    setRestaurants(mockRestaurants);
-  }, []);
+  const handleSwipe = (direction, index) => {
+    setSwipeDirection(direction);
+    setTimeout(() => {
+      setCards((prevCards) => prevCards.filter((_, i) => i !== index));
+      setSwipeDirection(null);
+      
 
-  // ✅ Listen for matchFound event
-  useEffect(() => {
-    socket.on('matchFound', ({ restaurantId, users }) => {
-      const match = restaurants.find(r => r.id === restaurantId);
-      if (match) {
-        console.log('🎉 MATCH FOUND:', match.name);
-        navigate('/match', { state: { restaurant: match, users } });
+      if (direction === "right") {
+        if (cards.length === 1) {
+          navigate('/match', { state: { restaurant: cards[index] } });
+        }
       }
-    });
-
-    return () => socket.off('matchFound');
-  }, [restaurants, navigate]);
-
-  // ✅ Emit swipes
-  const handleSwipe = (isRightSwipe) => {
-    const current = restaurants[currentIndex];
-    if (!current || !sessionCode || !userId) return;
-
-    if (isRightSwipe) {
-      socket.emit('swipe', {
-        sessionCode,
-        userId,
-        restaurantId: current.id,
-        direction: 'right'
-      });
-    }
-
-    // move to next card
-    setCurrentIndex((prev) => prev + 1);
+    }, 300);
   };
 
-  if (currentIndex >= restaurants.length) {
+  const handleButtonSwipe = (isLike) => {
+    if (cards.length === 0) return;
+    handleSwipe(isLike ? "right" : "left", cards.length - 1);
+  };
+
+  if (loading) {
+    return (
+      <div className="loading-page">
+        <div className="loader"></div>
+        <h2>Loading...</h2>
+      </div>
+    );
+  }
+
+  if (cards.length === 0) {
     return <h2 style={{ textAlign: 'center' }}>No more restaurants!</h2>;
   }
 
-  const current = restaurants[currentIndex];
-
   return (
     <div className="swipe-page">
-      <h2>Swipe on Restaurants</h2>
+      <h1>Swipe Deck</h1>
+      
+      {swipeDirection && (
+        <motion.div
+          className={`action ${swipeDirection}`}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1.1 }}
+          exit={{ opacity: 0, scale: 0 }}
+        >
+          {swipeDirection === "right" ? "LIKED" : "DISLIKED"}
+        </motion.div>
+      )}
 
-      <div className="restaurant-card">
-        <img src={current.image} alt={current.name} />
-        <h3>{current.name}</h3>
-        <p>{current.price}</p>
+      <div className="deck">
+        <AnimatePresence>
+          {cards.slice(-3).map((card, index) => {
+            const actualIndex = cards.length - 3 + index;
+            return (
+              <motion.div
+                key={card.name}
+                className={`card-ui`}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.5}
+                onDragEnd={(event, info) => {
+                  if (info.velocity.x > 0.5 || info.offset.x > 100) {
+                    handleSwipe("right", actualIndex);
+                  } else if (info.velocity.x < -0.5 || info.offset.x < -100) {
+                    handleSwipe("left", actualIndex);
+                  }
+                }}
+                initial={{ scale: 1, y: index * 10, zIndex: index }}
+                animate={{ scale: 1, y: index * 10, zIndex: index }}
+                exit={{
+                  x: swipeDirection === "right" ? 700 : -700,
+                  rotate: swipeDirection === "right" ? 15 : -15,
+                  opacity: 0,
+                }}
+                whileDrag={{ scale: 1.05 }}
+                style={{
+                  backgroundImage: `linear-gradient(
+                    to top,
+                    rgba(0, 0, 0, 0.6) 0%,
+                    rgba(0, 0, 0, 0.4) 30%,
+                    rgba(0, 0, 0, 0.0) 50%
+                  ), url(${card.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                }}
+              >
+                <div className="card-body">
+                  <div className="top-row">
+                    <h2>{card.name}</h2>
+                    <p className="tag price">{card["price range"]}</p>
+                  </div>
+                  <div className="bottom-row">
+                    <p className="tag rating">⭐ {card.rating}</p>
+                    <p className="tag cuisine">
+                      {Array.isArray(card["cuisine style"]) ? card["cuisine style"].join(", ") : ""}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
       </div>
 
-      <div className="button-group">
-        <button onClick={() => handleSwipe(false)}>❌ Skip</button>
-        <button onClick={() => handleSwipe(true)}>❤️ Like</button>
+      {/* Button group for manual swiping */}
+      <div className="swipe-button-group">
+        <button 
+
+          onClick={() => handleButtonSwipe(false)}
+        >
+          ❌ Skip
+        </button>
+        <button 
+
+          onClick={() => handleButtonSwipe(true)}
+        >
+          ❤️ Like
+        </button>
       </div>
     </div>
   );

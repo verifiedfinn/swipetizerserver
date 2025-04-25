@@ -27,7 +27,7 @@ function AppContent() {
       .then((response) => {
         if (!response.ok) throw new Error("Failed to fetch data");
         return response.json();
-      })
+      })    
       .then((data) => setCards(data.reverse()))
       .catch((error) => console.error("Error loading data:", error));
     return () => clearTimeout(timer);
