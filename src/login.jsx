@@ -11,7 +11,7 @@ function Login() {
   const [loginStatus, setLoginStatus] = useState("");
 
   const login = () => {
-    Axios.post("http://localhost:3001/login", {
+    Axios.post("/login", {
       username,
       password,
     })
@@ -21,7 +21,7 @@ function Login() {
 
           // ✅ Store in localStorage
           localStorage.setItem("userId", user.id);
-          localStorage.setItem("username", user.name);
+          localStorage.setItem("email", user.email);
 
           setLoginStatus(`Welcome, ${user.name}!`);
           navigate("/session-choice");

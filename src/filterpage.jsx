@@ -31,7 +31,7 @@ const FilterPage = () => {
 
     const session_token = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    Axios.post('http://localhost:3001/create-session', {
+    Axios.post('/create-session', {
       user_id: localStorage.getItem('userId') || sessionStorage.getItem('userId'),
       session_token,
       preferences,
@@ -39,7 +39,11 @@ const FilterPage = () => {
       .then(() => {
         setSessionCode(session_token);
         navigate(`/waiting-room?code=${session_token}`, {
-          state: { preferences } // ✅ This line is fixed
+          state: {
+            preferences,
+            isCreator: true,
+            creatorId: localStorage.getItem('userId') || sessionStorage.getItem('userId')
+          }
         });
       })
       .catch((error) => {

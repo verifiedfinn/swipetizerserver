@@ -16,7 +16,16 @@ const StartScreen = () => {
           <div className="button-group">
             <button onClick={() => navigate('/register')}>Get Started</button>
             <button onClick={() => navigate('/login')}>Log In</button>
-            <button onClick={() => navigate('/session-choice')}>Join without an account</button>
+            <button
+  onClick={() => {
+    localStorage.removeItem("userId");
+    localStorage.removeItem("email");
+    sessionStorage.clear();
+    navigate('/session-choice');
+  }}
+>
+  Join without an account
+</button>
           </div>
         </div>
       </div>

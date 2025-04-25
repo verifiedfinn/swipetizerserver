@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import socket from './socket';
+import getUser from './utils/getUser';
 
 const WaitingRoom = () => {
   const navigate = useNavigate();
@@ -17,17 +18,6 @@ const WaitingRoom = () => {
   const hasJoinedRef = useRef(false);
   const preferences = location.state?.preferences || null;
 
-  const getUser = () => {
-    const userId = localStorage.getItem('userId') || sessionStorage.getItem('userId');
-    const username = localStorage.getItem('username') || `Guest ${Math.floor(Math.random() * 1000)}`;
-    const finalId = userId || (() => {
-      const temp = `guest-${Math.floor(Math.random() * 100000)}`;
-      localStorage.setItem('guestId', temp);
-      return temp;
-    })();
-    return { id: finalId, username, isGuest: !userId };
-  };
-
   useEffect(() => {
     if (!sessionCode) {
       setError("No session code provided.");
@@ -39,20 +29,27 @@ const WaitingRoom = () => {
       if (hasJoinedRef.current) return;
       hasJoinedRef.current = true;
 
-      const { id: userId, username, isGuest } = getUser();
+      const { id: userId, isGuest } = getUser();
 
       try {
-        const res = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}`);
+        const res = await axios.get(`/api/sessions/${sessionCode}`);
         const hostId = res.data?.createdBy;
-        const isHost = !isGuest && Number(userId) === Number(hostId);
+        const creatorIdFromNav = location.state?.creatorId;
+        const isHost = location.state?.isCreator || String(userId) === String(hostId) || String(userId) === String(creatorIdFromNav);
         setIsCreator(isHost);
+
+        console.log("👉 Emitting user:", { id: userId, isGuest, isCreator: isHost });
 
         socket.emit("joinRoom", {
           sessionCode,
-          user: { id: userId, username, isCreator: isHost },
+          user: {
+            id: userId,
+            isGuest,
+            isCreator: isHost,
+          },
         });
 
-        const resP = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/participants`);
+        const resP = await axios.get(`/api/sessions/${sessionCode}/participants`);
         setParticipants(Array.isArray(resP.data) ? resP.data : []);
       } catch (err) {
         console.error("❌ Error joining session:", err);
@@ -79,7 +76,7 @@ const WaitingRoom = () => {
   useEffect(() => {
     const fetchParticipants = async () => {
       try {
-        const res = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/participants`);
+        const res = await axios.get(`/api/sessions/${sessionCode}/participants`);
         setParticipants(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("❌ Could not update participants:", err);
@@ -89,10 +86,10 @@ const WaitingRoom = () => {
     socket.on('participantUpdate', fetchParticipants);
     socket.on('sessionStarted', async () => {
       try {
-        const res = await axios.get(`http://localhost:3001/api/sessions/${sessionCode}/preferences`);
+        const res = await axios.get(`/api/sessions/${sessionCode}/preferences`);
         const prefsFromServer = res.data;
         navigate(`/swipe?code=${sessionCode}`, {
-          state: { preferences: prefsFromServer }
+          state: { preferences: prefsFromServer },
         });
       } catch (err) {
         console.error("❌ Failed to load session preferences:", err);
@@ -115,7 +112,7 @@ const WaitingRoom = () => {
 
   const handleLaunchSession = async () => {
     try {
-      await axios.post(`http://localhost:3001/api/sessions/${sessionCode}/launch`);
+      await axios.post(`/api/sessions/${sessionCode}/launch`);
       socket.emit('startSession', sessionCode);
       navigate(`/swipe?code=${sessionCode}`, { state: { preferences } });
     } catch {
@@ -169,7 +166,6 @@ const WaitingRoom = () => {
                 <span className="participant-name">
                   {p.username || `Guest ${i + 1}`}
                   {p.isCreator && <span className="creator-badge">Host</span>}
-                  {String(p.id).startsWith("guest") && <span className="guest-badge">Guest</span>}
                 </span>
               </div>
             ))

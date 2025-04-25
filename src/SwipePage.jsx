@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import socket from './socket';
+import getUser from './utils/getUser.js';
 
 const SwipePage = () => {
   const fullCardsRef = useRef([]);
@@ -83,15 +84,15 @@ const SwipePage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    const userId = localStorage.getItem("userId") || `guest-${socket.id}`;
-    const username = localStorage.getItem("username") || `Guest ${Math.floor(Math.random() * 1000)}`;
 
+  useEffect(() => {
+    const { id: userId, username } = getUser();
+  
     socket.emit("joinRoom", {
       sessionCode,
       user: { id: userId, username, isCreator: false }
     });
-
+  
     return () => {
       socket.emit("leave-session", sessionCode);
     };
@@ -140,6 +141,10 @@ const SwipePage = () => {
     handleSwipe(isLike ? "right" : "left", topCardIndex);
   };
 
+  // 🧠 ADD YOUR DEBUG LOGS HERE
+  console.log("🧠 Cards available:", cards.length);
+  console.log("🧠 Current preferences:", preferences);
+
   if (loading) {
     return (
       <div className="loading-page">
@@ -149,8 +154,9 @@ const SwipePage = () => {
     );
   }
 
-  if (cards.length === 0) {
-    return <h2 style={{ textAlign: 'center' }}>No more restaurants!</h2>;
+  // 🧠 ADD YOUR "no restaurants" message here
+  if (!cards || cards.length === 0) {
+    return <h2 style={{ textAlign: 'center' }}>No more restaurants found based on preferences.</h2>;
   }
 
   return (

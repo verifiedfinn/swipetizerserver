@@ -1,7 +1,8 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3001", {
-  autoConnect: false,
+// Ensuring proper connection configuration
+const socket = io({
+  autoConnect: false,  // Prevent automatic connection until explicitly triggered
 });
 
 export default socket;
