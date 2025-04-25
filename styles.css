@@ -627,3 +627,15 @@ button {
 button:hover{
   background-color: #e65a5a;
 }
+
+.back-button {
+  position: absolute;
+  top: 15px;
+  left: 20px;
+  font-size: 28px;
+  color: #f37474;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 999;
+}

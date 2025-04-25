@@ -1,39 +1,79 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { FaPhone, FaMapMarkerAlt, FaEllipsisH } from "react-icons/fa";
+import confetti from "canvas-confetti";
 import "./styles.css";
 
 const MatchPage = ({ restaurant }) => {
+  useEffect(() => {
+    confetti({
+      particleCount: 200,
+      spread: 100,
+      origin: { y: 0.6 },
+    });
+  }, []);
+
   return (
-    <div className="match-page" style={{ backgroundImage: `url(${restaurant?.image || "https://via.placeholder.com/800"})` }}>
-      {/* Text Animation */}
-      <motion.h1
-        className="match-text"
-        initial={{ scale: 3, opacity: 0 }}
+    <div
+      className="match-page-wrapper"
+      style={{
+        background: "radial-gradient(circle at center, rgba(0,0,0,0.7), rgba(0,0,0,0.95))",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        height: "100vh",
+        width: "100vw",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "1rem",
+        overflow: "hidden",
+        zIndex: 0
+      }}
+    >
+      <motion.div
+        className="card-ui match-card"
+        initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 100, damping: 15 }}
+        transition={{ type: "spring", stiffness: 100, damping: 14 }}
+        style={{
+          backgroundImage: `linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.6) 0%,
+            rgba(0, 0, 0, 0.4) 30%,
+            rgba(0, 0, 0, 0.0) 50%
+          ), url(${restaurant?.image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat"
+        }}
       >
-        IT'S A MATCH!
-      </motion.h1>
+        <div className="card-body">
+          <motion.h1
+            className="match-header"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: [1.1, 1.05, 1], opacity: 1 }}
+            transition={{ duration: 1, ease: "easeInOut" }}
+          >
+            💘 It's a Match!
+            <span className="white-sheen" />
+          </motion.h1>
 
-      {/* Restaurant Info */}
-      <div className="info-section">
-        <h2>{restaurant?.name || "Restaurant Name"}</h2>
-        <p>{restaurant?.price || "Price Range"}</p>
+          <h2 className="restaurant-title">{restaurant?.name}</h2>
+          <p className="tag price">{restaurant?.["price range"]}</p>
+          <p className="tag cuisine">
+            {Array.isArray(restaurant?.["cuisine style"])
+              ? restaurant["cuisine style"].join(", ")
+              : ""}
+          </p>
 
-        {/* Buttons Section */}
-        <div className="button-group">
-          <button className="button">
-            <FaPhone />
-          </button>
-          <button className="button">
-            <FaMapMarkerAlt />
-          </button>
-          <button className="button">
-            <FaEllipsisH />
-          </button>
+          <div className="button-group">
+            <button className="button pretty-button"><FaPhone /></button>
+            <button className="button pretty-button"><FaMapMarkerAlt /></button>
+            <button className="button pretty-button"><FaEllipsisH /></button>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

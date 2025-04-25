@@ -1,51 +1,143 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { io } from 'socket.io-client';
-
-const socket = io('http://localhost:3001'); // adjust for prod
+import { AnimatePresence, motion } from 'framer-motion';
+import socket from './socket';
 
 const SwipePage = () => {
+  const fullCardsRef = useRef([]);
   const [cards, setCards] = useState([]);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [restaurants, setRestaurants] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const sessionCode = new URLSearchParams(location.search).get("code");
 
-  // Total people in the session (hardcoded)
-  const participantsCount = 4;
+  const preferences = location.state?.preferences || {
+    cuisinePreferences: [],
+    dietaryRestrictions: [],
+    priceRange: [1, 5],
+    ratingRange: [1, 5],
+  };
+
+  console.log("🧪 Test preferences used:", preferences);
+
+  const filterRestaurants = (data, prefs = {}) => {
+    const prefsCuisine = (prefs.cuisinePreferences || []).map(c => c.toLowerCase());
+    const prefsDiet = (prefs.dietaryRestrictions || []).map(d => d.toLowerCase());
+    const prefsPrice = prefs.priceRange || [1, 5];
+    const prefsRating = prefs.ratingRange || [1, 5];
+
+    return data.filter((restaurant) => {
+      const name = restaurant.name;
+      const cuisines = Array.isArray(restaurant["cuisine style"])
+        ? restaurant["cuisine style"].map(c => c.toLowerCase())
+        : [];
+
+      const priceStr = restaurant["price range"] || "";
+      const firstSymbolMatch = priceStr.match(/[$€]+/g);
+      const priceLevel = firstSymbolMatch ? firstSymbolMatch[0].length : 1;
+
+      const rating = parseFloat(restaurant.rating) || 0;
+
+      const matchCuisine =
+        prefsCuisine.length === 0 ||
+        prefsCuisine.some(pref => cuisines.includes(pref));
+
+      const matchDiet =
+        prefsDiet.length === 0 ||
+        prefsDiet.some(diet => cuisines.includes(diet));
+
+      const matchPrice = priceLevel >= prefsPrice[0] && priceLevel <= prefsPrice[1];
+      const matchRating = rating >= prefsRating[0] && rating <= prefsRating[1];
+
+      const shouldInclude = matchCuisine && matchDiet && matchPrice && matchRating;
+
+      // 🧠 Debug Log
+      console.log(`[FILTERING] ${name}`);
+      console.log("  cuisines:", cuisines);
+      console.log("  matchCuisine:", matchCuisine);
+      console.log("  matchDiet:", matchDiet);
+      console.log("  priceLevel:", priceLevel, "matchPrice:", matchPrice);
+      console.log("  rating:", rating, "matchRating:", matchRating);
+      console.log("  ✅ Included:", shouldInclude);
+      console.log(" ");
+
+      return shouldInclude;
+    });
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1000);
+
     fetch("/localdata.json")
-      .then((response) => {
-        if (!response.ok) throw new Error("Failed to fetch data");
-        return response.json();
-      })    
-      .then((data) => setCards(data.reverse()))
-      .catch((error) => console.error("Error loading data:", error));
+      .then(res => res.json())
+      .then(data => {
+        const filtered = filterRestaurants(data, preferences);
+        console.log("✅ Filtered Results:", filtered.map(r => r.name));
+        setCards(filtered.reverse());
+        fullCardsRef.current = filtered;
+      })
+      .catch(err => console.error("❌ Failed to load cards:", err));
+
     return () => clearTimeout(timer);
   }, []);
 
-  const handleSwipe = (direction, index) => {
-    setSwipeDirection(direction);
-    setTimeout(() => {
-      setCards((prevCards) => prevCards.filter((_, i) => i !== index));
-      setSwipeDirection(null);
-      
+  useEffect(() => {
+    const userId = localStorage.getItem("userId") || `guest-${socket.id}`;
+    const username = localStorage.getItem("username") || `Guest ${Math.floor(Math.random() * 1000)}`;
 
-      if (direction === "right") {
-        if (cards.length === 1) {
-          navigate('/match', { state: { restaurant: cards[index] } });
-        }
+    socket.emit("joinRoom", {
+      sessionCode,
+      user: { id: userId, username, isCreator: false }
+    });
+
+    return () => {
+      socket.emit("leave-session", sessionCode);
+    };
+  }, [sessionCode]);
+
+  useEffect(() => {
+    const handleMatch = (data) => {
+      const matchedRestaurant = fullCardsRef.current.find(
+        r => Number(r.id) === Number(data.restaurantId)
+      );
+
+      if (matchedRestaurant) {
+        navigate('/match', { state: { restaurant: matchedRestaurant } });
+      } else {
+        console.warn("⚠️ Matched restaurant not found:", data.restaurantId);
+      }
+    };
+
+    socket.on("matchFound", handleMatch);
+    return () => socket.off("matchFound", handleMatch);
+  }, [navigate]);
+
+  const handleSwipe = (direction, index) => {
+    const swipedCard = cards[index];
+    setSwipeDirection(direction);
+
+    setTimeout(() => {
+      setCards(prev => prev.filter((_, i) => i !== index));
+      setSwipeDirection(null);
+
+      if (direction === "right" && swipedCard) {
+        const userId = localStorage.getItem("userId") || `guest-${socket.id}`;
+        socket.emit("swipe", {
+          sessionCode,
+          restaurantId: swipedCard.id,
+          userId,
+          direction: "right"
+        });
       }
     }, 300);
   };
 
   const handleButtonSwipe = (isLike) => {
     if (cards.length === 0) return;
-    handleSwipe(isLike ? "right" : "left", cards.length - 1);
+    const topCardIndex = cards.length - 1;
+    handleSwipe(isLike ? "right" : "left", topCardIndex);
   };
 
   if (loading) {
@@ -64,7 +156,7 @@ const SwipePage = () => {
   return (
     <div className="swipe-page">
       <h1>Swipe Deck</h1>
-      
+
       {swipeDirection && (
         <motion.div
           className={`action ${swipeDirection}`}
@@ -83,7 +175,7 @@ const SwipePage = () => {
             return (
               <motion.div
                 key={card.name}
-                className={`card-ui`}
+                className="card-ui"
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.5}
@@ -99,7 +191,7 @@ const SwipePage = () => {
                 exit={{
                   x: swipeDirection === "right" ? 700 : -700,
                   rotate: swipeDirection === "right" ? 15 : -15,
-                  opacity: 0,
+                  opacity: 0
                 }}
                 whileDrag={{ scale: 1.05 }}
                 style={{
@@ -111,7 +203,7 @@ const SwipePage = () => {
                   ), url(${card.image})`,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
-                  backgroundRepeat: 'no-repeat',
+                  backgroundRepeat: 'no-repeat'
                 }}
               >
                 <div className="card-body">
@@ -132,20 +224,9 @@ const SwipePage = () => {
         </AnimatePresence>
       </div>
 
-      {/* Button group for manual swiping */}
       <div className="swipe-button-group">
-        <button 
-
-          onClick={() => handleButtonSwipe(false)}
-        >
-          ❌ Skip
-        </button>
-        <button 
-
-          onClick={() => handleButtonSwipe(true)}
-        >
-          ❤️ Like
-        </button>
+        <button onClick={() => handleButtonSwipe(false)}>❌ Skip</button>
+        <button onClick={() => handleButtonSwipe(true)}>❤️ Like</button>
       </div>
     </div>
   );

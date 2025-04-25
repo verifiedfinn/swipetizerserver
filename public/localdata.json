@@ -1,5 +1,6 @@
 [
-{
+  {
+    "id": 1,
     "name": "Bloom Brasserie",
     "city": "Dublin",
     "cuisine style": ["Irish", "European"],
@@ -8,6 +9,7 @@
     "image": "images/bloom.jpg"
   },
   {
+    "id": 2,
     "name": "The Vintage Kitchen",
     "city": "Dublin",
     "cuisine style": ["Irish", "European"],
@@ -16,6 +18,7 @@
     "image": "images/vintagekitch.jpg"
   },
   {
+    "id": 3,
     "name": "Chapter One",
     "city": "Dublin",
     "cuisine style": ["Irish", "European"],
@@ -24,6 +27,7 @@
     "image": "images/chapter1.jpg"
   },
   {
+    "id": 4,
     "name": "Dax Restaurant",
     "city": "Dublin",
     "cuisine style": ["French"],
@@ -32,6 +36,7 @@
     "image": "images/dax.jpg"
   },
   {
+    "id": 5,
     "name": "Lemon and Duke",
     "city": "Dublin",
     "cuisine style": ["Irish", "European", "Pub", "Bar", "Vegetarian Friendly", "Vegan Options", "Gluten Free Options"],
@@ -40,6 +45,7 @@
     "image": "images/lemonduke.jpg"
   },
   {
+    "id": 6,
     "name": "Pickle",
     "city": "Dublin",
     "cuisine style": ["Indian", "Asian", "Vegetarian Friendly", "Vegan Options", "Gluten Free Options"],
@@ -48,6 +54,7 @@
     "image": "images/pickle.jpg"
   },
   {
+    "id": 7,
     "name": "Boojum - Millenium Walkway",
     "city": "Dublin",
     "cuisine style": ["Mexican", "Fast Food", "Vegetarian Friendly", "Vegan Options", "Gluten Free Options"],
@@ -56,6 +63,7 @@
     "image": "images/boojum.jpg"
   },
   {
+    "id": 8,
     "name": "Pablo Picante",
     "city": "Dublin",
     "cuisine style": ["Mexican", "Latin", "Fast Food", "Central American", "Vegetarian Friendly", "Vegan Options"],
@@ -64,6 +72,7 @@
     "image": "images/pablopicante.jpg"
   },
   {
+    "id": 9,
     "name": "El Grito",
     "city": "Dublin",
     "cuisine style": ["Mexican", "Latin", "Fast Food", "Central American", "Vegetarian Friendly"],
@@ -72,6 +81,7 @@
     "image": "images/elgrito.jpeg"
   },
   {
+    "id": 10,
     "name": "Mexico to Rome",
     "city": "Dublin",
     "cuisine style": ["Italian", "Mexican", "European", "Vegetarian Friendly", "Gluten Free Options"],
@@ -80,6 +90,7 @@
     "image": "images/mexicotorome.jpg"
   },
   {
+    "id": 11,
     "name": "Hang Dai Chinese",
     "city": "Dublin",
     "cuisine style": ["Chinese", "Asian", "Vegetarian Friendly"],
@@ -88,6 +99,7 @@
     "image": "images/hangdai.jpg"
   },
   {
+    "id": 12,
     "name": "Ka Shing",
     "city": "Dublin",
     "cuisine style": ["Chinese", "Asian", "Vegetarian Friendly"],
@@ -96,6 +108,7 @@
     "image": "images/kashing.jpeg"
   },
   {
+    "id": 13,
     "name": "The Chili Shack",
     "city": "Dublin",
     "cuisine style": ["Mexican", "American", "Southwestern", "Canadian"],
@@ -104,6 +117,7 @@
     "image": "images/chilishack.jpeg"
   },
   {
+    "id": 14,
     "name": "Dada Moroccan Cuisine",
     "city": "Dublin",
     "cuisine style": ["African", "Moroccan", "Mediterranean", "Middle Eastern", "Vegetarian Friendly", "Vegan Options", "Halal", "Gluten Free Options"],
@@ -112,6 +126,7 @@
     "image": "images/dada.jpg"
   },
   {
+    "id": 15,
     "name": "Milano Restaurant",
     "city": "Dublin",
     "cuisine style": ["Italian", "Pizza", "European", "Vegetarian Friendly", "Vegan Options", "Gluten Free Options"],
@@ -120,6 +135,7 @@
     "image": "images/milano.jpg"
   },
   {
+    "id": 16,
     "name": "Matt the Rashers",
     "city": "Dublin",
     "cuisine style": ["Irish", "Cafe", "Grill"],
@@ -128,14 +144,16 @@
     "image": "images/mattrashers.jpeg"
   },
   {
+    "id": 17,
     "name": "Wowburger",
     "city": "Dublin",
     "cuisine style": ["American", "Bar", "Fast Food"],
     "rating": "4",
     "price range": "$",
     "image": "images/wowburger.jpg"
-  },  
+  },
   {
+    "id": 18,
     "name": "Sistar Indian Cuisine",
     "city": "Dublin",
     "cuisine style": ["Indian", "Asian", "Vegetarian Friendly", "Vegan Options", "Gluten Free Options"],
@@ -144,6 +162,7 @@
     "image": "images/sitar.jpeg"
   },
   {
+    "id": 19,
     "name": "El Bahia",
     "city": "Dublin",
     "cuisine style": ["African", "Moroccan", "Mediterranean", "Vegetarian Friendly", "Halal"],
@@ -152,6 +171,7 @@
     "image": "images/elbahia.jpg"
   },
   {
+    "id": 20,
     "name": "Arirang",
     "city": "Dublin",
     "cuisine style": ["Asian", "Korean"],
@@ -160,6 +180,7 @@
     "image": "images/arirang.jpg"
   },
   {
+    "id": 21,
     "name": "Munchies",
     "city": "Dublin",
     "cuisine style": ["Cafe", "European"],
@@ -168,6 +189,7 @@
     "image": "images/munchies.jpg"
   },
   {
+    "id": 22,
     "name": "Little Ass Burito Bar",
     "city": "Dublin",
     "cuisine style": ["Mexican", "Fast Food", "Vegan Options"],
@@ -176,6 +198,7 @@
     "image": "images/littleass.jpeg"
   },
   {
+    "id": 23,
     "name": "Iskanders Kebab Shop",
     "city": "Dublin",
     "cuisine style": ["Fast Food", "Turkish", "Middle Eastern", "Halal"],
@@ -184,6 +207,7 @@
     "image": "images/iskanders.jpg"
   },
   {
+    "id": 24,
     "name": "Eddie Rocket's City Diner",
     "city": "Dublin",
     "cuisine style": ["American", "Fast Food", "Diner"],
@@ -192,6 +216,7 @@
     "image": "images/eddierocket.jpg"
   },
   {
+    "id": 25,
     "name": "Mushashi",
     "city": "Dublin",
     "cuisine style": ["Japanese", "Seafood", "Sushi", "Asian"],

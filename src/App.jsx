@@ -8,9 +8,25 @@ import StartScreen from './startscreen.jsx';
 import SessionChoice from './sessionchoice.jsx';
 import FilterPage from './filterpage.jsx';
 import WaitingRoom from './WaitingRoom.jsx';
+import MatchPage from './match.jsx';
+import SwipePage from './SwipePage.jsx';
+
 
 import "./styles.css";
-import SwipePage from './SwipePage.jsx';
+function MatchPageWrapper() {
+  const location = useLocation();
+  const restaurant = location.state?.restaurant;
+
+  // Optionally redirect if no restaurant passed
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!restaurant) {
+      navigate("/swipe"); // fallback to swipe
+    }
+  }, [restaurant, navigate]);
+
+  return <MatchPage restaurant={restaurant} />;
+}
 
 function AppContent() {
   const [cards, setCards] = useState([]);
@@ -78,6 +94,9 @@ function AppContent() {
         <Route path="/filter-page" element={<FilterPage />} />
         <Route path="/swipe" element={<SwipePage />} />
         <Route path="/waiting-room" element={<WaitingRoom />} />
+        <Route path="/match" element={<MatchPageWrapper />}
+        
+/>
         <Route path="/home" element={
           sessionCode ? (
             <>

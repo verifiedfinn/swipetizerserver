@@ -10,7 +10,7 @@ const StartScreen = () => {
       <div className="phone-frame">
         <div className="start-screen">
           <div className="logo-placeholder">
-            <img src="/placeholder-logo.png" alt="Swipetizer Logo" />
+            <img src="../public/images/swipelogo.svg" alt="Swipetizer Logo" />
           </div>
 
           <div className="button-group">
