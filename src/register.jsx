@@ -22,19 +22,25 @@ function Register() {
     .then((response) => {
       console.log(response.data);
     
-      // Store user in localStorage
+      // Store user in localStorage and log in automatically
       if (response.data.user) {
         localStorage.setItem("userId", response.data.user.id);
         localStorage.setItem("username", response.data.user.name);
+        localStorage.setItem("email", response.data.user.email); // If needed, you can store the email as well
       }
     
       setStatus("✅ Registered successfully!");
-      setTimeout(() => navigate('/session-choice'), 1000);
+
+      // Automatically log the user in and navigate
+      setTimeout(() => {
+        setStatus("");
+        navigate('/session-choice'); // Redirect to the session choice page
+      }, 1000);
     })
-      .catch((error) => {
-        console.error(error);
-        setStatus("❌ Registration failed.");
-      });
+    .catch((error) => {
+      console.error(error);
+      setStatus("❌ Registration failed.");
+    });
   };
 
   return (
@@ -63,7 +69,7 @@ function Register() {
         </div>
 
         <div className="submit-container">
-        <button type="submit" onClick={register}>Register</button>
+          <button type="submit" onClick={register}>Register</button>
         </div>
         
         {status && <p style={{ marginTop: '10px' }}>{status}</p>}

@@ -14,6 +14,7 @@ const SessionChoice = () => {
     }
   };
 
+  // Standard Navigation with paths defined for the main buttons 
   return (
     <div className="session-choice-wrapper">
       <div className="session-choice-card">

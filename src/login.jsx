@@ -19,7 +19,7 @@ function Login() {
         if (response.data.message === "Login successful") {
           const user = response.data.user;
 
-          // ✅ Store in localStorage
+          // Store in localStorage
           localStorage.setItem("userId", user.id);
           localStorage.setItem("email", user.email);
 

@@ -1,10 +1,13 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaPhone, FaMapMarkerAlt, FaEllipsisH } from "react-icons/fa";
 import confetti from "canvas-confetti";
 import "./styles.css";
 
 const MatchPage = ({ restaurant }) => {
+  const navigate = useNavigate();
+
   useEffect(() => {
     confetti({
       particleCount: 200,
@@ -13,6 +16,27 @@ const MatchPage = ({ restaurant }) => {
     });
   }, []);
 
+  // Force redirect back to session choice on browser back
+  useEffect(() => {
+    const handlePopState = () => {
+      navigate("/session-choice", { replace: true });
+    };
+
+    window.history.pushState(null, "", window.location.pathname);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [navigate]);
+
+  const openMap = (address) => {
+    const encodedAddress = encodeURIComponent(address);
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    window.open(url, "_blank");
+  };
+
+  // Full match criteria and internal applied style with buttons 
   return (
     <div
       className="match-page-wrapper"
@@ -68,9 +92,23 @@ const MatchPage = ({ restaurant }) => {
           </p>
 
           <div className="button-group">
-            <button className="button pretty-button"><FaPhone /></button>
-            <button className="button pretty-button"><FaMapMarkerAlt /></button>
-            <button className="button pretty-button"><FaEllipsisH /></button>
+            <a href={`tel:${restaurant?.phone}`}>
+              <button className="button pretty-button">
+                <FaPhone />
+              </button>
+            </a>
+            <button
+              className="button pretty-button"
+              onClick={() => openMap(restaurant?.address)}
+            >
+              <FaMapMarkerAlt />
+            </button>
+            <button
+              className="button pretty-button"
+              onClick={() => navigate("/session-choice")}
+            >
+              <FaEllipsisH />
+            </button>
           </div>
         </div>
       </motion.div>

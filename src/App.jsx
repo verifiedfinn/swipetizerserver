@@ -1,27 +1,34 @@
-import React, { useState, useEffect, act } from "react";
+// App.jsx
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useLocation,
+  useNavigate
+} from "react-router-dom";
 import MapPage from "./mappage.jsx";
-import Login from './login.jsx'; 
-import Register from './register.jsx';
-import StartScreen from './startscreen.jsx';
-import SessionChoice from './sessionchoice.jsx';
-import FilterPage from './filterpage.jsx';
-import WaitingRoom from './WaitingRoom.jsx';
-import MatchPage from './match.jsx';
-import SwipePage from './SwipePage.jsx';
-
+import Login from "./login.jsx";
+import Register from "./register.jsx";
+import StartScreen from "./startscreen.jsx";
+import SessionChoice from "./sessionchoice.jsx";
+import FilterPage from "./filterpage.jsx";
+import WaitingRoom from "./WaitingRoom.jsx";
+import MatchPage from "./match.jsx";
+import SwipePage from "./SwipePage.jsx";
 
 import "./styles.css";
+
 function MatchPageWrapper() {
   const location = useLocation();
   const restaurant = location.state?.restaurant;
-
-  // Optionally redirect if no restaurant passed
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!restaurant) {
-      navigate("/swipe"); // fallback to swipe
+      navigate("/swipe");
     }
   }, [restaurant, navigate]);
 
@@ -31,7 +38,7 @@ function MatchPageWrapper() {
 function AppContent() {
   const [cards, setCards] = useState([]);
   const [swipeDirection, setSwipeDirection] = useState(null);
-  const [sessionCode, setSessionCode] = useState(null); 
+  const [sessionCode, setSessionCode] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const location = useLocation();
@@ -43,7 +50,7 @@ function AppContent() {
       .then((response) => {
         if (!response.ok) throw new Error("Failed to fetch data");
         return response.json();
-      })    
+      })
       .then((data) => setCards(data.reverse()))
       .catch((error) => console.error("Error loading data:", error));
     return () => clearTimeout(timer);
@@ -81,10 +88,6 @@ function AppContent() {
 
   return (
     <div className="App">
-      <nav className="navbar">
-        <Link to="/home">Swipe Deck</Link>
-        <Link to="/map">Location Map</Link>
-      </nav>
 
       <Routes>
         <Route path="/" element={<StartScreen />} />
@@ -94,87 +97,84 @@ function AppContent() {
         <Route path="/filter-page" element={<FilterPage />} />
         <Route path="/swipe" element={<SwipePage />} />
         <Route path="/waiting-room" element={<WaitingRoom />} />
-        <Route path="/match" element={<MatchPageWrapper />}
-        
-/>
-        <Route path="/home" element={
-          sessionCode ? (
-            <>
-              <h1>Swipe Deck</h1>
-              <h2>Session code: {sessionCode}</h2>
-              {swipeDirection && (
-                <motion.div
-                  className={`action ${swipeDirection}`}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1.1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                >
-                  {swipeDirection === "right" ? "LIKED" : "DISLIKED"}
-                </motion.div>
-              )}
-
-<div className="deck">
-  <AnimatePresence>
-  {cards.slice(-3).map((card, index) => {
-  const actualIndex = cards.length - 3 + index;
-  return (
-    <motion.div
-      key={card.name}
-      className={`card-ui`}
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.5}
-      onDragEnd={(event, info) => {
-        if (info.velocity.x > 0.5 || info.offset.x > 100) {
-          handleSwipe("right", actualIndex);
-        } else if (info.velocity.x < -0.5 || info.offset.x < -100) {
-          handleSwipe("left", actualIndex);
-        }
-      }}
-      initial={{ scale: 1, y: index * 10, zIndex: index }}
-      animate={{ scale: 1, y: index * 10, zIndex: index }}
-      exit={{
-        x: swipeDirection === "right" ? 700 : -700,
-        rotate: swipeDirection === "right" ? 15 : -15,
-        opacity: 0,
-      }}
-      whileDrag={{ scale: 1.05 }}
-      style={{
-        backgroundImage: `linear-gradient(
-          to top,
-          rgba(0, 0, 0, 0.6) 0%,
-          rgba(0, 0, 0, 0.4) 30%,
-          rgba(0, 0, 0, 0.0) 50%
-        ), url(${card.image})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-  
-  <div className="card-body">
-    <div className="top-row">
-      <h2>{card.name}</h2>
-      <p className="tag price">{card["price range"]}</p>
-    </div>
-    <div className="bottom-row">
-      <p className="tag rating">⭐ {card.rating}</p>
-      <p className="tag cuisine">
-    {Array.isArray(card["cuisine style"]) ? card["cuisine style"].join(", ") : ""}
-  </p>
-    </div>
-    </div>
-
-      </motion.div>
-  );
-})}
-  </AnimatePresence>
-</div>
-            </>
-          ) : null
-        } />
-
+        <Route path="/match" element={<MatchPageWrapper />} />
         <Route path="/map" element={<MapPage />} />
+        <Route
+          path="/home"
+          element={
+            sessionCode ? (
+              <>
+                <h1>Swipe Deck</h1>
+                <h2>Session code: {sessionCode}</h2>
+                {swipeDirection && (
+                  <motion.div
+                    className={`action ${swipeDirection}`}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1.1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                  >
+                    {swipeDirection === "right" ? "LIKED" : "DISLIKED"}
+                  </motion.div>
+                )}
+                <div className="deck">
+                  <AnimatePresence>
+                    {cards.slice(-3).map((card, index) => {
+                      const actualIndex = cards.length - 3 + index;
+                      return (
+                        <motion.div
+                          key={card.name}
+                          className="card-ui"
+                          drag="x"
+                          dragConstraints={{ left: 0, right: 0 }}
+                          dragElastic={0.5}
+                          onDragEnd={(e, info) => {
+                            if (info.velocity.x > 0.5 || info.offset.x > 100) {
+                              handleSwipe("right", actualIndex);
+                            } else if (
+                              info.velocity.x < -0.5 ||
+                              info.offset.x < -100
+                            ) {
+                              handleSwipe("left", actualIndex);
+                            }
+                          }}
+                          initial={{ scale: 1, y: index * 10, zIndex: index }}
+                          animate={{ scale: 1, y: index * 10, zIndex: index }}
+                          exit={{
+                            x: swipeDirection === "right" ? 700 : -700,
+                            rotate: swipeDirection === "right" ? 15 : -15,
+                            opacity: 0
+                          }}
+                          whileDrag={{ scale: 1.05 }}
+                          style={{
+                            backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0.0) 50%), url(${card.image})`,
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundRepeat: "no-repeat"
+                          }}
+                        >
+                          <div className="card-body">
+                            <div className="top-row">
+                              <h2>{card.name}</h2>
+                              <p className="tag price">{card["price range"]}</p>
+                            </div>
+                            <div className="bottom-row">
+                              <p className="tag rating">⭐ {card.rating}</p>
+                              <p className="tag cuisine">
+                                {Array.isArray(card["cuisine style"])
+                                  ? card["cuisine style"].join(", ")
+                                  : ""}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              </>
+            ) : null
+          }
+        />
       </Routes>
     </div>
   );

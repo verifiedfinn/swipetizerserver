@@ -10,7 +10,10 @@ const WaitingRoom = () => {
   const queryParams = new URLSearchParams(location.search);
   const sessionCode = queryParams.get('code');
 
-  const [isCreator, setIsCreator] = useState(false);
+  const [isCreator, setIsCreator] = useState(() => {
+    const saved = sessionStorage.getItem("isCreator");
+    return saved ? JSON.parse(saved) : false;
+  });
   const [participants, setParticipants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -25,30 +28,46 @@ const WaitingRoom = () => {
       return;
     }
 
+    // Join session functionality
+  
     const joinSession = async () => {
       if (hasJoinedRef.current) return;
       hasJoinedRef.current = true;
-
+  
       const { id: userId, isGuest } = getUser();
-
+  
       try {
         const res = await axios.get(`/api/sessions/${sessionCode}`);
         const hostId = res.data?.createdBy;
         const creatorIdFromNav = location.state?.creatorId;
         const isHost = location.state?.isCreator || String(userId) === String(hostId) || String(userId) === String(creatorIdFromNav);
         setIsCreator(isHost);
-
-        console.log("👉 Emitting user:", { id: userId, isGuest, isCreator: isHost });
-
-        socket.emit("joinRoom", {
-          sessionCode,
-          user: {
-            id: userId,
-            isGuest,
-            isCreator: isHost,
-          },
-        });
-
+        sessionStorage.setItem("isCreator", JSON.stringify(isHost));
+  
+        // Ensure the socket is connected before emitting the joinRoom event
+        if (socket.connected) {
+          socket.emit("joinRoom", {
+            sessionCode,
+            user: {
+              id: userId,
+              isGuest,
+              isCreator: isHost,
+            },
+          });
+        } else {
+          socket.once('connect', () => {
+            socket.emit("joinRoom", {
+              sessionCode,
+              user: {
+                id: userId,
+                isGuest,
+                isCreator: isHost,
+              },
+            });
+          });
+          socket.connect();
+        }
+  
         const resP = await axios.get(`/api/sessions/${sessionCode}/participants`);
         setParticipants(Array.isArray(resP.data) ? resP.data : []);
       } catch (err) {
@@ -59,14 +78,9 @@ const WaitingRoom = () => {
         setIsLoading(false);
       }
     };
-
-    if (socket.connected) {
-      joinSession();
-    } else {
-      socket.once('connect', joinSession);
-      socket.connect();
-    }
-
+  
+    joinSession();
+  
     return () => {
       socket.emit("leave-session", sessionCode);
       socket.off("connect", joinSession);
@@ -77,6 +91,21 @@ const WaitingRoom = () => {
     const fetchParticipants = async () => {
       try {
         const res = await axios.get(`/api/sessions/${sessionCode}/participants`);
+        const fetchedParticipants = Array.isArray(res.data) ? res.data : [];
+
+        const { id: userId } = getUser();
+        const isCreatorFromStorage = JSON.parse(sessionStorage.getItem("isCreator") || "false");
+
+        const patchedParticipants = fetchedParticipants.map(p => {
+        if (String(p.id) === String(userId)) {
+    return { ...p, isCreator: isCreatorFromStorage };
+  }
+  return p;
+});
+
+// Participant handler to show how is what where
+
+setParticipants(patchedParticipants);
         setParticipants(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("❌ Could not update participants:", err);
@@ -89,7 +118,7 @@ const WaitingRoom = () => {
         const res = await axios.get(`/api/sessions/${sessionCode}/preferences`);
         const prefsFromServer = res.data;
         navigate(`/swipe?code=${sessionCode}`, {
-          state: { preferences: prefsFromServer },
+          state: { preferences: prefsFromServer, isCreator },
         });
       } catch (err) {
         console.error("❌ Failed to load session preferences:", err);
@@ -103,6 +132,8 @@ const WaitingRoom = () => {
     };
   }, [sessionCode, navigate, preferences]);
 
+  // Cody Copy 
+
   const copySessionCode = () => {
     navigator.clipboard.writeText(sessionCode).then(() => {
       setCopied(true);
@@ -114,7 +145,9 @@ const WaitingRoom = () => {
     try {
       await axios.post(`/api/sessions/${sessionCode}/launch`);
       socket.emit('startSession', sessionCode);
-      navigate(`/swipe?code=${sessionCode}`, { state: { preferences } });
+      navigate(`/swipe?code=${sessionCode}`, {
+        state: { preferences: { ...preferences, selectedLocation }, isCreator },
+      });
     } catch {
       setError("Failed to launch session.");
     }

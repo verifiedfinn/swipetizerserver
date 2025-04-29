@@ -1,3 +1,4 @@
+// Main start page
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styles.css';
@@ -10,7 +11,7 @@ const StartScreen = () => {
       <div className="phone-frame">
         <div className="start-screen">
           <div className="logo-placeholder">
-            <img src="../public/images/swipelogo.svg" alt="Swipetizer Logo" />
+            <img src="/images/swipelogo.svg" alt="Swipetizer Logo" />
           </div>
 
           <div className="button-group">
