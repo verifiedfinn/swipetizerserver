@@ -1,11 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import socket from './socket';
-import getUser from './utils/getUser.js';
 
-// Distance connector
-
+// Distance calculator
 const getDistanceInKm = (lat1, lon1, lat2, lon2) => {
   const toRad = (value) => (value * Math.PI) / 180;
   const R = 6371;
@@ -18,8 +15,6 @@ const getDistanceInKm = (lat1, lon1, lat2, lon2) => {
   return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
 };
 
-// Functionality 
-
 const SwipePage = () => {
   const fullCardsRef = useRef([]);
   const [cards, setCards] = useState([]);
@@ -28,14 +23,13 @@ const SwipePage = () => {
   const [showInstruction, setShowInstruction] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
-  const sessionCode = new URLSearchParams(location.search).get("code");
 
-  const preferences = location.state?.preferences || { cuisinePreferences: [], dietaryRestrictions: [], priceRange: [1, 5], ratingRange: [1, 5] };
-  const isCreator =
-  location.state?.isCreator ??
-  JSON.parse(sessionStorage.getItem("isCreator") || "false");
-
-  // Filter cards parced to json
+  const preferences = location.state?.preferences || {
+    cuisinePreferences: [],
+    dietaryRestrictions: [],
+    priceRange: [1, 5],
+    ratingRange: [1, 5]
+  };
 
   const filterRestaurants = (data, prefs) => {
     const prefsCuisine = (prefs.cuisinePreferences || []).map(c => c.toLowerCase());
@@ -84,34 +78,6 @@ const SwipePage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  useEffect(() => {
-    const { id: userId, username } = getUser();
-    socket.emit("joinRoom", {
-      sessionCode,
-      user: { id: userId, username, isCreator }
-    });
-
-    return () => {
-      socket.emit("leave-session", sessionCode);
-    };
-  }, [sessionCode, isCreator]);
-
-  useEffect(() => {
-    const handleMatch = (data) => {
-      const matchedRestaurant = fullCardsRef.current.find(
-        r => Number(r.id) === Number(data.restaurantId)
-      );
-      if (matchedRestaurant) {
-        navigate('/match', { state: { restaurant: matchedRestaurant } });
-      }
-    };
-
-    socket.on("matchFound", handleMatch);
-    return () => socket.off("matchFound", handleMatch);
-  }, [navigate]);
-
-  // Swiping functionality 
-  
   const handleSwipe = (direction) => {
     const topCard = cards[0];
     if (!topCard) return;
@@ -123,13 +89,7 @@ const SwipePage = () => {
       setSwipeDirection(null);
 
       if (direction === "right") {
-        const userId = localStorage.getItem("userId") || `guest-${socket.id}`;
-        socket.emit("swipe", {
-          sessionCode,
-          restaurantId: topCard.id,
-          userId,
-          direction: "right"
-        });
+        navigate('/match', { state: { restaurant: topCard } });
       }
     }, 300);
   };
@@ -141,57 +101,21 @@ const SwipePage = () => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       const tag = e.target.tagName.toLowerCase();
-      const isInputField = tag === 'input' || tag === 'textarea';
-  
-      // Prevent conflicts with typing
-      if (isInputField) return;
-  
+      if (tag === 'input' || tag === 'textarea') return;
+
       if (e.key === 'ArrowRight') {
         e.preventDefault();
         handleButtonSwipe(true);
       }
-  
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
         handleButtonSwipe(false);
       }
     };
-  
+
     window.addEventListener("keydown", handleKeyDown, { passive: false });
-  
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleButtonSwipe]);
-  
-
-  useEffect(() => {
-    const message = "Are you sure you want to leave? You'll exit the session.";
-
-    const handleBeforeUnload = (e) => {
-      e.preventDefault();
-      e.returnValue = message;
-      return message;
-    };
-
-    const handlePopState = () => {
-      const confirmLeave = window.confirm(message);
-      if (!confirmLeave) {
-        window.history.pushState(null, "", window.location.pathname);
-      } else {
-        navigate(`/waiting-room?code=${sessionCode}`, { state: { isCreator } });
-      }
-    };
-
-    window.history.pushState(null, "", window.location.pathname);
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [navigate, sessionCode, isCreator]);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   if (loading) {
     return (
@@ -231,61 +155,61 @@ const SwipePage = () => {
         </motion.div>
       )}
 
-<div className="deck">
-  <AnimatePresence>
-    {cards.slice(0, 3).map((card, index) => {
-      const reverseIndex = 2 - index; // top card is index 0
-      return (
-        <motion.div
-          key={card.name}
-          className="card-ui"
-          drag="x"
-          dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.5}
-          onDragEnd={(e, info) => {
-            if (info.velocity.x > 0.5 || info.offset.x > 100) {
-              handleSwipe("right");
-            } else if (info.velocity.x < -0.5 || info.offset.x < -100) {
-              handleSwipe("left");
-            }
-          }}
-          initial={{ scale: 1, y: reverseIndex * 10, zIndex: reverseIndex }}
-          animate={{ scale: 1, y: reverseIndex * 10, zIndex: reverseIndex }}
-          exit={{
-            x: swipeDirection === "right" ? 700 : -700,
-            rotate: swipeDirection === "right" ? 15 : -15,
-            opacity: 0
-          }}
-          whileDrag={{ scale: 1.05 }}
-          style={{
-            backgroundImage: `linear-gradient(
-              to top,
-              rgba(0, 0, 0, 0.6) 0%,
-              rgba(0, 0, 0, 0.4) 30%,
-              rgba(0, 0, 0, 0.0) 50%
-            ), url(${card.image})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
-          }}
-        >
-          <div className="card-body">
-            <div className="top-row">
-              <h2>{card.name}</h2>
-              <p className="tag price">{card["price range"]}</p>
-            </div>
-            <div className="bottom-row">
-              <p className="tag rating">⭐ {card.rating}</p>
-              <p className="tag cuisine">
-                {Array.isArray(card["cuisine style"]) ? card["cuisine style"].join(", ") : ""}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      );
-    })}
-  </AnimatePresence>
-</div>
+      <div className="deck">
+        <AnimatePresence>
+          {cards.slice(0, 3).map((card, index) => {
+            const reverseIndex = 2 - index;
+            return (
+              <motion.div
+                key={card.name}
+                className="card-ui"
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.5}
+                onDragEnd={(e, info) => {
+                  if (info.velocity.x > 0.5 || info.offset.x > 100) {
+                    handleSwipe("right");
+                  } else if (info.velocity.x < -0.5 || info.offset.x < -100) {
+                    handleSwipe("left");
+                  }
+                }}
+                initial={{ scale: 1, y: reverseIndex * 10, zIndex: reverseIndex }}
+                animate={{ scale: 1, y: reverseIndex * 10, zIndex: reverseIndex }}
+                exit={{
+                  x: swipeDirection === "right" ? 700 : -700,
+                  rotate: swipeDirection === "right" ? 15 : -15,
+                  opacity: 0
+                }}
+                whileDrag={{ scale: 1.05 }}
+                style={{
+                  backgroundImage: `linear-gradient(
+                    to top,
+                    rgba(0, 0, 0, 0.6) 0%,
+                    rgba(0, 0, 0, 0.4) 30%,
+                    rgba(0, 0, 0, 0.0) 50%
+                  ), url(${card.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat'
+                }}
+              >
+                <div className="card-body">
+                  <div className="top-row">
+                    <h2>{card.name}</h2>
+                    <p className="tag price">{card["price range"]}</p>
+                  </div>
+                  <div className="bottom-row">
+                    <p className="tag rating">⭐ {card.rating}</p>
+                    <p className="tag cuisine">
+                      {Array.isArray(card["cuisine style"]) ? card["cuisine style"].join(", ") : ""}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
 
       <div className="swipe-button-group">
         <button onClick={() => handleButtonSwipe(false)}>❌ Skip</button>

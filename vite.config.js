@@ -11,7 +11,7 @@ export default defineConfig({
     }
   },
   optimizeDeps: {
-    exclude: ['mapbox-gl']
+    include: ['mapbox-gl']
   },
   define: {
     'process.env': {}

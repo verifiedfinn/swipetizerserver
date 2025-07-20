@@ -7,24 +7,22 @@ import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import "./styles.css";
 import useUserLocation from "./hooks/useUserLocation";
 
-mapboxgl.accessToken = 'pk.eyJ1IjoidmVyaWZpZWRmaW5uIiwiYSI6ImNtN21tdWQ2ZjBqcm8ycnIwNXFwN2Z4bGcifQ.BckuIZ-IAbwTNq6oaIunGg';
+// Mapbox Access Token (used inline instead of assigning to mapboxgl)
+const MAPBOX_TOKEN = 'pk.eyJ1IjoidmVyaWZpZWRmaW5uIiwiYSI6ImNtN21tdWQ2ZjBqcm8ycnIwNXFwN2Z4bGcifQ.BckuIZ-IAbwTNq6oaIunGg';
 
 const MapPage = () => {
   const mapContainerRef = useRef(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [locationName, setLocationName] = useState("");  // For storing the location name based on coordinates
-
+  const [locationName, setLocationName] = useState("");
   const markerRef = useRef(null);
   const mapRef = useRef(null);
   const [loading, setLoading] = useState(true);
 
-  // Hook to get user location
   const { userLocation } = useUserLocation([]);
   const navigate = useNavigate();
 
-  // Reverse geocoding to get location name
   const reverseGeocode = async (lat, lng) => {
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}`;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}`;
     try {
       const response = await fetch(url);
       const data = await response.json();
@@ -35,36 +33,27 @@ const MapPage = () => {
     }
   };
 
-  // Update selected location on map click
   const handleMapClick = (e) => {
     const { lat, lng } = e.lngLat;
     setSelectedLocation({ lat, lng });
-
-    // Reverse Geocoding to get the name of the location
     reverseGeocode(lat, lng);
-
-    // Remove previous marker
-    if (markerRef.current) {
-      markerRef.current.remove();
-    }
-
-    // Add new marker
+    if (markerRef.current) markerRef.current.remove();
     markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapRef.current);
   };
 
-  // Initialize map
   useEffect(() => {
     const mapInstance = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v11",
-      center: [-6.2603, 53.3498], // Default: Dublin
+      center: [-6.2603, 53.3498],
       zoom: 14,
+      accessToken: MAPBOX_TOKEN,
     });
 
     mapRef.current = mapInstance;
 
     const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
+      accessToken: MAPBOX_TOKEN,
       mapboxgl: mapboxgl,
       marker: false,
     });
@@ -72,52 +61,31 @@ const MapPage = () => {
     mapInstance.addControl(geocoder, "top-left");
 
     geocoder.on("result", (event) => {
-      const { center } = event.result;
-      const [lng, lat] = center;
-
+      const [lng, lat] = event.result.center;
       setSelectedLocation({ lng, lat });
-      reverseGeocode(lat, lng);  // Get the location name on result
-
-      // Remove previous marker
-      if (markerRef.current) {
-        markerRef.current.remove();
-      }
-
-      // Add new marker
+      reverseGeocode(lat, lng);
+      if (markerRef.current) markerRef.current.remove();
       markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(mapInstance);
       mapInstance.flyTo({ center: [lng, lat], zoom: 14 });
     });
 
-    // Handle click on the map to change location
     mapInstance.on("click", handleMapClick);
 
     return () => {
-      mapInstance.off("click", handleMapClick); // Clean up the click event listener
+      mapInstance.off("click", handleMapClick);
       mapInstance.remove();
     };
   }, []);
 
   useEffect(() => {
-    // Ensure that map updates occur only after userLocation updates
     if (userLocation && mapRef.current && !selectedLocation) {
-      setLoading(false); // stop loading
-      console.log("Focusing on user location...");
-      console.log("User Location:", userLocation);
-
-      // Reverse geocode the user location on load
+      setLoading(false);
       reverseGeocode(userLocation.lat, userLocation.lng);
-
       mapRef.current.flyTo({
         center: [userLocation.lng, userLocation.lat],
         zoom: 14,
       });
-
-      // Remove previous marker
-      if (markerRef.current) {
-        markerRef.current.remove();
-      }
-
-      // Add user location marker
+      if (markerRef.current) markerRef.current.remove();
       markerRef.current = new mapboxgl.Marker()
         .setLngLat([userLocation.lng, userLocation.lat])
         .addTo(mapRef.current);
@@ -125,33 +93,21 @@ const MapPage = () => {
   }, [userLocation, selectedLocation]);
 
   const focusOnUserLocation = () => {
-    console.log("Focusing on user location...");
     if (userLocation && mapRef.current) {
-      console.log("User Location:", userLocation);
       mapRef.current.flyTo({
         center: [userLocation.lng, userLocation.lat],
         zoom: 14,
       });
-
-      // Remove previous marker
-      if (markerRef.current) {
-        markerRef.current.remove();
-      }
-
-      // Create new marker
+      if (markerRef.current) markerRef.current.remove();
       markerRef.current = new mapboxgl.Marker()
         .setLngLat([userLocation.lng, userLocation.lat])
         .addTo(mapRef.current);
     }
   };
 
-  const handleGoBack = () => {
-    navigate(-1);  // Go back to the filter page
-  };
+  const handleGoBack = () => navigate(-1);
 
-  // Confirm location and navigate to FilterPage with coordinates and location name
   const handleConfirmLocation = () => {
-    // Use either selected location or user location if no selection was made
     const locationToConfirm = selectedLocation || userLocation;
     if (locationToConfirm && locationName) {
       navigate(`/filter-page?lat=${locationToConfirm.lat}&lng=${locationToConfirm.lng}&locationName=${encodeURIComponent(locationName)}`);
@@ -161,9 +117,7 @@ const MapPage = () => {
   return (
     <div className="map-page">
       <h1>Location Selection</h1>
-
       {loading && <p>Loading your location...</p>}
-
       <div ref={mapContainerRef} style={{ width: "100%", height: "500px" }}></div>
 
       {selectedLocation ? (
@@ -174,15 +128,9 @@ const MapPage = () => {
         <p>📍 Loading location...</p>
       )}
 
-      {/* Display location name below coordinates */}
       {locationName && <p style={{ marginTop: "10px" }}>Location: {locationName}</p>}
 
-      <button 
-        onClick={handleGoBack}
-        className="back-button"
-      >
-        ⬅ Go Back
-      </button>
+      <button onClick={handleGoBack} className="back-button">⬅ Go Back</button>
 
       <div className="focus-button">
         <button onClick={focusOnUserLocation}>📍 Use My Location</button>

@@ -62,39 +62,31 @@ const FilterPage = () => {
     );
   };
 
-  const handleCreateSession = () => {
-    const preferences = {
-      distance,
-      priceRange,
-      ratingRange,
-      dietaryRestrictions,
-      cuisinePreferences,
-      selectedLocation, 
-    };
-  
-    const session_token = Math.random().toString(36).substring(2, 8).toUpperCase();
-  
-    Axios.post('/create-session', {
-      user_id: localStorage.getItem('userId') || sessionStorage.getItem('userId'),
-      session_token,
-      preferences,
-    })
-      .then(() => {
-        setSessionCode(session_token);
-        navigate(`/waiting-room?code=${session_token}`, {
-          state: {
-            preferences,
-            selectedLocation,
-            filteredPOIs: [],
-            isCreator: true,
-            creatorId: localStorage.getItem('userId') || sessionStorage.getItem('userId'),
-          },
-        });
-      })
-      .catch((error) => {
-        console.error('❌ Error creating session:', error);
-      });
+const handleCreateSession = () => {
+  const preferences = {
+    distance,
+    priceRange,
+    ratingRange,
+    dietaryRestrictions,
+    cuisinePreferences,
+    selectedLocation, 
   };
+
+  const session_token = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  // Skip API call
+  // Simulate successful session creation
+  setSessionCode(session_token);
+  navigate(`/waiting-room?code=${session_token}`, {
+    state: {
+      preferences,
+      selectedLocation,
+      filteredPOIs: [],
+      isCreator: true,
+      creatorId: session_token, // fake creator
+    },
+  });
+};
 
   // Filters 
   return (
