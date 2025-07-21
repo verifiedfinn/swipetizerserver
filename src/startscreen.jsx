@@ -15,8 +15,6 @@ const StartScreen = () => {
           </div>
 
           <div className="button-group">
-            <button onClick={() => navigate('/register')}>Get Started</button>
-            <button onClick={() => navigate('/login')}>Log In</button>
             <button
   onClick={() => {
     localStorage.removeItem("userId");
